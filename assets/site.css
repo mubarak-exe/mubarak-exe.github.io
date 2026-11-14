@@ -148,11 +148,12 @@ h1[tabindex]:focus, main:focus { outline: none; }
 .icon-btn svg, .kbd-btn svg { width: 18px; height: 18px; }
 #theme-toggle[data-mode="dark"] .i-moon, #theme-toggle[data-mode="light"] .i-sun { display: none; }
 .menu-btn { display: inline-grid; }
-.menu-btn .bars { width: 18px; height: 12px; position: relative; display: block; }
-.menu-btn .bars span { position: absolute; left: 0; right: 0; height: 2px; background: currentColor; border-radius: 2px; transition: transform 0.3s var(--ease), top 0.3s var(--ease); }
-.menu-btn .bars span:first-child { top: 1px; } .menu-btn .bars span:last-child { top: 9px; }
-.menu-btn[aria-expanded="true"] .bars span:first-child { top: 5px; transform: rotate(45deg); }
-.menu-btn[aria-expanded="true"] .bars span:last-child { top: 5px; transform: rotate(-45deg); }
+/* Own class name: ".bars" is the bar-chart component and its padding and border used to leak in here. */
+.menu-btn .menu-bars { width: 18px; height: 12px; position: relative; display: block; }
+.menu-btn .menu-bars span { position: absolute; left: 0; right: 0; height: 2px; background: currentColor; border-radius: 2px; transition: transform 0.3s var(--ease), top 0.3s var(--ease); }
+.menu-btn .menu-bars span:first-child { top: 1px; } .menu-btn .menu-bars span:last-child { top: 9px; }
+.menu-btn[aria-expanded="true"] .menu-bars span:first-child { top: 5px; transform: rotate(45deg); }
+.menu-btn[aria-expanded="true"] .menu-bars span:last-child { top: 5px; transform: rotate(-45deg); }
 kbd {
   font-family: var(--mono); font-size: 0.7rem; line-height: 1; padding: 3px 6px;
   border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--bg); color: var(--muted);
@@ -695,7 +696,7 @@ body:has(dialog.viewer[open]) { overflow: hidden; }
 .poem-text p { margin: 0 0 1.6em; font-family: var(--serif); font-size: clamp(1.18rem, 2.2vw, 1.38rem); line-height: 1.75; white-space: pre-line; }
 .poem-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding-top: 28px; border-top: 1px solid var(--line); }
 .poem-pager { max-width: 39rem; margin: clamp(48px, 7vw, 88px) auto 0; display: grid; gap: 16px; }
-@media (min-width: 640px) { .poem-pager { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 640px) { .poem-pager { grid-template-columns: 1fr 1fr; } .poem-pager .next:only-child { grid-column: 2; } }
 .poem-pager a { display: grid; gap: 6px; padding: 20px 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--ink); text-decoration: none; transition: border-color 0.2s; }
 .poem-pager a:hover { border-color: var(--accent); }
 .poem-pager .next { text-align: right; }

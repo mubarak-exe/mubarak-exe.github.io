@@ -679,38 +679,21 @@
   /* Add a poem: copy one entry, give it a new id starting with "poem-", */
   /* and split stanzas with commas (each stanza is one string; "\n"     */
   /* starts a new line). Mark one poem featured: true for the top card. */
-  /* Delete the "sample" entries once your own poems are in.           */
+  /* Untitled poems use their first line as the title.                  */
+  /* lede is the line under the page title; leave it "" to hide it.     */
   /* ------------------------------------------------------------------ */
   SITE.poemsPage = {
     kicker: "Writing",
     title: "Poems",
-    lede: "[One or two lines on what you write about, and why.]"
+    lede: ""
   };
 
   SITE.poems = [
-    { id: "poem-hope", title: "Hope is the thing with feathers", sample: "Emily Dickinson", stanzas: [
-      "“Hope” is the thing with feathers –\nThat perches in the soul –\nAnd sings the tune without the words –\nAnd never stops – at all –",
-      "And sweetest – in the Gale – is heard –\nAnd sore must be the storm –\nThat could abash the little Bird\nThat kept so many warm –",
-      "I’ve heard it in the chillest land –\nAnd on the strangest Sea –\nYet – never – in Extremity,\nIt asked a crumb – of me."
+    { id: "poem-white-clouds", title: "As the white clouds drift", featured: true, stanzas: [
+      "As the white clouds drift,\nAnd the green grass bows,\nAs the Sunlit warmth spreads,\nAnd the River’s song flows,\nI wander, borne on the breeze\nWith a heart that longs,\nFor a place it knows."
     ] },
-    { id: "poem-nothing-gold", title: "Nothing Gold Can Stay", sample: "Robert Frost", featured: true, stanzas: [
-      "Nature’s first green is gold,\nHer hardest hue to hold.\nHer early leaf’s a flower;\nBut only so an hour.\nThen leaf subsides to leaf.\nSo Eden sank to grief,\nSo dawn goes down to day.\nNothing gold can stay."
-    ] },
-    { id: "poem-dust-of-snow", title: "Dust of Snow", sample: "Robert Frost", stanzas: [
-      "The way a crow\nShook down on me\nThe dust of snow\nFrom a hemlock tree",
-      "Has given my heart\nA change of mood\nAnd saved some part\nOf a day I had rued."
-    ] },
-    { id: "poem-fog", title: "Fog", sample: "Carl Sandburg", stanzas: [
-      "The fog comes\non little cat feet.",
-      "It sits looking\nover harbor and city\non silent haunches\nand then moves on."
-    ] },
-    { id: "poem-remember", title: "Remember", sample: "Christina Rossetti", stanzas: [
-      "Remember me when I am gone away,\nGone far away into the silent land;\nWhen you can no more hold me by the hand,\nNor I half turn to go yet turning stay.\nRemember me when no more day by day\nYou tell me of our future that you plann’d:\nOnly remember me; you understand\nIt will be late to counsel then or pray.",
-      "Yet if you should forget me for a while\nAnd afterwards remember, do not grieve:\nFor if the darkness and corruption leave\nA vestige of the thoughts that once I had,\nBetter by far you should forget and smile\nThan that you should remember and be sad."
-    ] },
-    { id: "poem-nobody", title: "I’m Nobody! Who are you?", sample: "Emily Dickinson", stanzas: [
-      "I’m Nobody! Who are you?\nAre you – Nobody – too?\nThen there’s a pair of us!\nDon’t tell! they’d advertise – you know!",
-      "How dreary – to be – Somebody!\nHow public – like a Frog –\nTo tell one’s name – the livelong June –\nTo an admiring Bog!"
+    { id: "poem-sunset", title: "Walking, running, chasing, tracking", stanzas: [
+      "Walking, running, chasing, tracking\nIn the pursuit of a sunset lacking,\nMet with trees, people, birds, and lakes,\nYet still no glimpse my eyes could take.\nThese little failures, sharp as knives,\nMark the chapters of my cheerful life."
     ] }
   ];
 
@@ -730,7 +713,7 @@
   SITE.photographyPage = {
     kicker: "Seeing",
     title: "Photography",
-    lede: "[One or two lines on what you like to photograph.]"
+    lede: ""
   };
 
   // PHOTOS-START (managed by portfolio/scripts/add-photos.py)

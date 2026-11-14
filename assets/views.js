@@ -620,7 +620,7 @@
 <section class="wrap page-hero calm-hero" aria-labelledby="poems-title">
   <p class="kicker dash">${page.kicker}</p>
   <h1 class="serif-title lines" id="poems-title" tabindex="-1">${lines([page.title])}</h1>
-  <p class="calm-lede">${page.lede}</p>
+  ${page.lede ? `<p class="calm-lede">${page.lede}</p>` : ""}
 </section>
 <section class="wrap" aria-label="Featured poem">
   <div class="poem-feature rv">
@@ -633,14 +633,25 @@
 </section>
 <section class="wrap calm-section" aria-labelledby="all-poems-title">
   <div class="list-head"><h2 id="all-poems-title">All poems</h2><p class="mono-sm">${P.length} poems</p></div>
-  <ol class="poem-list">${P.map((p, i) => `<li class="rv"><a class="poem-row" href="#${p.id}"><span class="poem-num">${pad2(i + 1)}</span><span class="poem-row-main"><span class="poem-row-title">${esc(p.title)}</span><span class="poem-row-first">${esc(p.stanzas[0].split("\n")[0])}</span></span><span class="poem-row-meta">${poemLineCount(p)} lines</span></a></li>`).join("")}</ol>
+  <ol class="poem-list">${P.map((p, i) => {
+    // Skip the first-line preview when the title already is the first line (untitled poems).
+    const first = p.stanzas[0].split("\n")[0];
+    const showFirst = !first.toLowerCase().startsWith(p.title.toLowerCase());
+    return `<li class="rv"><a class="poem-row" href="#${p.id}"><span class="poem-num">${pad2(i + 1)}</span><span class="poem-row-main"><span class="poem-row-title">${esc(p.title)}</span>${showFirst ? `<span class="poem-row-first">${esc(first)}</span>` : ""}</span><span class="poem-row-meta">${poemLineCount(p)} lines</span></a></li>`;
+  }).join("")}</ol>
 </section>
 <div class="calm-end"></div>`;
   };
 
   V.poem = function (p) {
     const P = SITE.poems, i = P.indexOf(p), n = P.length;
-    const prev = P[(i - 1 + n) % n], next = P[(i + 1) % n];
+    // Wrap around only with 3+ poems; with 2, "previous" and "next" would be the same poem.
+    const prev = n > 2 || i > 0 ? P[(i - 1 + n) % n] : null;
+    const next = n > 2 || i < n - 1 ? P[(i + 1) % n] : null;
+    const pager = prev || next ? `<nav class="poem-pager" aria-label="More poems">
+    ${prev ? `<a href="#${prev.id}"><span class="pager-dir">Previous poem</span><span class="poem-pager-name">${esc(prev.title)}</span></a>` : ""}
+    ${next ? `<a class="next" href="#${next.id}"><span class="pager-dir">Next poem</span><span class="poem-pager-name">${esc(next.title)}</span></a>` : ""}
+  </nav>` : "";
     return `
 <article class="wrap poem-page" aria-labelledby="poem-title">
   <a class="back-link" href="#poems"><span aria-hidden="true">←</span> All poems</a>
@@ -653,10 +664,7 @@
     <div class="poem-text">${p.stanzas.map(s => `<p>${esc(s)}</p>`).join("")}</div>
     <div class="poem-actions">${appreciateBtn(p.id)}<button class="appreciate" type="button" data-copy-link>${LINK_ICON}<span>Copy link</span></button></div>
   </div>
-  <nav class="poem-pager" aria-label="More poems">
-    <a href="#${prev.id}"><span class="pager-dir">Previous poem</span><span class="poem-pager-name">${esc(prev.title)}</span></a>
-    <a class="next" href="#${next.id}"><span class="pager-dir">Next poem</span><span class="poem-pager-name">${esc(next.title)}</span></a>
-  </nav>
+  ${pager}
 </article>`;
   };
 
@@ -691,7 +699,7 @@
 <section class="wrap page-hero calm-hero" aria-labelledby="photo-title">
   <p class="kicker dash">${page.kicker}</p>
   <h1 class="serif-title lines" id="photo-title" tabindex="-1">${lines([page.title])}</h1>
-  <p class="calm-lede">${page.lede}</p>
+  ${page.lede ? `<p class="calm-lede">${page.lede}</p>` : ""}
 </section>
 <section class="wrap" aria-label="Photographs">
   <ul class="masonry" data-masonry>${SITE.photos.map(photoTile).join("")}</ul>
