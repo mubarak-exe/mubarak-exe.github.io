@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mubarak Shikalgar</title>
+<meta name="description" content="Mubarak Shikalgar, machine learning researcher in Waterloo, Ontario: travel-time estimation, digital twins for urban mobility, and LLM agents for simulation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("ms-theme");
+      if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) { /* storage unavailable: follow the system theme */ }
+  })();
+</script>
+<link rel="canonical" href="https://mubarak.sh/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#F4F6F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0A1828" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mubarak.sh/">
+<meta property="og:title" content="Mubarak Shikalgar">
+<meta property="og:description" content="Mubarak Shikalgar, machine learning researcher in Waterloo, Ontario: travel-time estimation, digital twins for urban mobility, and LLM agents for simulation.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<div class="progress" id="progress" aria-hidden="true"><span></span></div>
+
+<header class="site-header" id="site-header">
+  <div class="wrap header-bar">
+    <a class="brand" href="#home">
+      <span class="brand-name">Mubarak Shikalgar</span>
+      <span class="brand-sub">ML research · Waterloo</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#work" data-nav="work">Work</a>
+      <a href="#thinking" data-nav="thinking">Thinking</a>
+      <a href="#poems" data-nav="poems">Poems</a>
+      <a href="#photography" data-nav="photography">Photography</a>
+      <a href="#about" data-nav="about">About</a>
+      <a href="#contact" data-nav="contact">Contact</a>
+    </nav>
+    <div class="header-tools">
+      <button class="kbd-btn" type="button" id="open-palette" aria-label="Search and jump to a page" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <span class="kbd-label">Search</span>
+        <kbd><span data-kbd-mod>Ctrl</span> K</kbd>
+      </button>
+      <button class="icon-btn" type="button" id="theme-toggle" aria-label="Switch theme">
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8L6 18M18 6l1.8-1.8"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" type="button" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+        <span class="bars" aria-hidden="true"><span></span><span></span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu" hidden>
+  <nav aria-label="Mobile">
+    <a href="#home" data-nav="home">Home <span aria-hidden="true">→</span></a>
+    <a href="#work" data-nav="work">Work <span aria-hidden="true">→</span></a>
+    <a href="#thinking" data-nav="thinking">Thinking <span aria-hidden="true">→</span></a>
+    <a href="#poems" data-nav="poems">Poems <span aria-hidden="true">→</span></a>
+    <a href="#photography" data-nav="photography">Photography <span aria-hidden="true">→</span></a>
+    <a href="#about" data-nav="about">About <span aria-hidden="true">→</span></a>
+    <a href="#contact" data-nav="contact">Contact <span aria-hidden="true">→</span></a>
+  </nav>
+  <div class="email-line">
+    <span class="email-text">er.mubaraks@gmail.com</span>
+    <button class="btn" type="button" data-copy="er.mubaraks@gmail.com">Copy email</button>
+  </div>
+</div>
+
+<main id="view" tabindex="-1">
+  <noscript>
+    <div class="wrap page-hero">
+      <h1 class="display page-title">Mubarak Shikalgar</h1>
+      <p class="page-lede">Machine learning researcher in Waterloo, Ontario. This portfolio needs JavaScript to display. Email: er.mubaraks@gmail.com</p>
+    </div>
+  </noscript>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-cta">
+      <p class="kicker dash">Currently</p>
+      <p class="footer-big">Looking for machine learning and research roles in <em>Canada</em>.</p>
+      <div class="email-line">
+        <span class="email-text">er.mubaraks@gmail.com</span>
+        <button class="btn btn-amber" type="button" data-copy="er.mubaraks@gmail.com">Copy email</button>
+        <a class="btn btn-ghost-band" href="https://linkedin.com/in/mubaraks" target="_blank" rel="noopener">LinkedIn <span class="arr" aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="footer-grid">
+      <div>
+        <p class="kicker">Pages</p>
+        <ul>
+          <li><a href="#work">Work</a></li>
+          <li><a href="#thinking">Thinking</a></li>
+          <li><a href="#poems">Poems</a></li>
+          <li><a href="#photography">Photography</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="kicker">Elsewhere</p>
+        <ul>
+          <li><a href="https://linkedin.com/in/mubaraks" target="_blank" rel="noopener">LinkedIn ↗</a></li>
+          <li><a href="https://github.com/mubarak-exe" target="_blank" rel="noopener">GitHub ↗</a></li>
+          <li><a href="https://scholars.wlu.ca/etd/2908/" target="_blank" rel="noopener">Master's thesis ↗</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="kicker">Based in</p>
+        <p>Waterloo, Ontario, Canada<br><span class="mono-sm">43.46° N, 80.52° W</span></p>
+      </div>
+      <div>
+        <p class="kicker">Shortcut</p>
+        <p>Press <kbd data-kbd-mod>Ctrl</kbd> <kbd>K</kbd> or <kbd>/</kbd> to jump to any page, project or note.</p>
+      </div>
+    </div>
+    <div class="footer-base">
+      <span>© 2026 Mubarak Shikalgar</span>
+      <button class="to-top" type="button" data-top>Back to top ↑</button>
+    </div>
+  </div>
+</footer>
+
+<dialog class="palette" id="palette" aria-label="Search and jump">
+  <div class="palette-box">
+    <div class="palette-input">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="palette-input" type="text" placeholder="Search pages, projects and notes" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="palette-list" aria-autocomplete="list" aria-label="Search">
+      <kbd>Esc</kbd>
+    </div>
+    <ul class="palette-list" id="palette-list" role="listbox" aria-label="Results"></ul>
+    <div class="palette-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> to move</span><span><kbd>Enter</kbd> to open</span><span><kbd>Esc</kbd> to close</span></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/content.js"></script>
+<script src="assets/views.js"></script>
+<script src="assets/demos.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
