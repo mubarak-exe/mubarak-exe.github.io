@@ -305,7 +305,7 @@
       idx = (i + n) % n;
       const ph = photos[idx];
       setRatio(ph.ratio || "3 / 2", ratioNum(ph.ratio || "3 / 2"));
-      frame.innerHTML = PV.frame(ph, idx, true);
+      frame.innerHTML = PV.frame(ph, idx, true, true);
       const img = frame.querySelector("img");
       if (img && !ph.ratio) {
         const fit = () => { if (img.naturalWidth) setRatio(`${img.naturalWidth} / ${img.naturalHeight}`, img.naturalWidth / img.naturalHeight); };
@@ -314,7 +314,8 @@
       count.textContent = `${pad2(idx + 1)} / ${pad2(n)}`;
       title.textContent = PV.title(ph);
       meta.textContent = PV.meta(ph);
-      note.textContent = ph.note || "[A line or two about this photo: where you were, what caught your eye.]";
+      note.textContent = ph.note || (ph.src ? "" : "[A line or two about this photo: where you were, what caught your eye.]");
+      [title, meta, note].forEach(el => { el.hidden = !el.textContent; });
       like.dataset.appreciate = ph.id;
       paintLike(like);
     }

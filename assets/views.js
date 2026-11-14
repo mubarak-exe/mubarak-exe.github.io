@@ -660,10 +660,19 @@
 </article>`;
   };
 
-  const photoTitle = ph => ph.title || "[Photo title]";
-  const photoMeta = ph => `${ph.place || "[Place]"} · ${ph.year || "[Year]"}`;
-  function photoFrame(ph, i, eager) {
-    if (ph.src) return `<img src="${esc(ph.src)}" alt="${esc(ph.alt || ph.title || "")}"${eager ? "" : ' loading="lazy"'} decoding="async">`;
+  // Placeholder frames (no src) show [bracket] prompts; real photos show only the details filled in.
+  const photoTitle = ph => ph.title || (ph.src ? "" : "[Photo title]");
+  const photoMeta = ph => ph.src ? [ph.place, ph.year].filter(Boolean).join(" · ") : `${ph.place || "[Place]"} · ${ph.year || "[Year]"}`;
+  // Grid tiles let the browser pick the small copy (thumb) or the full one; the viewer (full) always loads the full one.
+  const TILE_SIZES = "(max-width: 560px) 50vw, (max-width: 1100px) 33vw, 300px";
+  function photoFrame(ph, i, eager, full) {
+    if (ph.src) {
+      const alt = ` alt="${esc(ph.alt || ph.title || "")}"`, lazy = eager ? "" : ' loading="lazy"';
+      if (!full && ph.thumb && ph.tw && ph.w) {
+        return `<img src="${esc(ph.thumb)}" srcset="${esc(ph.thumb)} ${ph.tw}w, ${esc(ph.src)} ${ph.w}w" sizes="${TILE_SIZES}"${alt}${lazy} decoding="async">`;
+      }
+      return `<img src="${esc(ph.src)}"${alt}${lazy} decoding="async">`;
+    }
     return `<span class="ph-placeholder" style="background:${TONES[i % TONES.length]}">${CAMERA}<span>Photo ${pad2(i + 1)}</span></span>`;
   }
   SITE.photoView = { frame: photoFrame, title: photoTitle, meta: photoMeta };
@@ -671,7 +680,9 @@
   function photoTile(ph, i) {
     const ratio = ph.ratio ? ` style="aspect-ratio:${esc(ph.ratio)}"` : "";
     const name = ph.title || `photo ${i + 1}`;
-    return `<li class="ph-item"><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}</span><span class="ph-cap"><span class="ph-title">${esc(photoTitle(ph))}</span><span class="ph-meta">${esc(photoMeta(ph))}</span></span></button></li>`;
+    const t = photoTitle(ph), m = photoMeta(ph);
+    const cap = t || m ? `<span class="ph-cap">${t ? `<span class="ph-title">${esc(t)}</span>` : ""}${m ? `<span class="ph-meta">${esc(m)}</span>` : ""}</span>` : "";
+    return `<li class="ph-item"><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}</span>${cap}</button></li>`;
   }
 
   V.photography = function () {

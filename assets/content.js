@@ -716,12 +716,16 @@
 
   /* ------------------------------------------------------------------ */
   /* Photography                                                         */
-  /* Add a photo: put the file in assets/photos/, then fill in src      */
-  /* (e.g. "assets/photos/lake.jpg"), alt (what the photo shows, for    */
-  /* screen readers), title, place, year and note. ratio is the photo's */
-  /* width / height (e.g. "3 / 2" landscape, "2 / 3" portrait); leave   */
-  /* it out for a real photo and the page reads it from the file.      */
-  /* Entries with no src show a placeholder.                            */
+  /* Add photos: drop the originals (HEIC, JPG, PNG) into                */
+  /* e:\Projects\Resume\photos-to-add\ and run                           */
+  /*   python portfolio/scripts/add-photos.py                            */
+  /* It strips location/camera data, fixes rotation, makes web-sized    */
+  /* copies in assets/photos/ and adds them to the top of the list      */
+  /* below. Then fill in alt (what the photo shows, for screen readers),*/
+  /* title, place and note. The list order is the order on the page.    */
+  /* Keep the list between the PHOTOS markers in strict JSON (double    */
+  /* quotes, no trailing commas): the script reads and rewrites it.     */
+  /* Entries with no src show a placeholder frame.                      */
   /* ------------------------------------------------------------------ */
   SITE.photographyPage = {
     kicker: "Seeing",
@@ -729,18 +733,38 @@
     lede: "[One or two lines on what you like to photograph.]"
   };
 
+  // PHOTOS-START (managed by portfolio/scripts/add-photos.py)
   SITE.photos = [
-    { id: "photo-01", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "3 / 4" },
-    { id: "photo-02", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "3 / 2" },
-    { id: "photo-03", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "1 / 1" },
-    { id: "photo-04", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "2 / 3" },
-    { id: "photo-05", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "16 / 9" },
-    { id: "photo-06", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "4 / 5" },
-    { id: "photo-07", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "3 / 2" },
-    { id: "photo-08", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "2 / 3" },
-    { id: "photo-09", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "1 / 1" },
-    { id: "photo-10", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "4 / 3" },
-    { id: "photo-11", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "3 / 4" },
-    { id: "photo-12", src: "", alt: "", title: "", place: "", year: "", note: "", ratio: "16 / 9" }
+    {"id": "photo-001", "src": "assets/photos/photo-001.jpg", "thumb": "assets/photos/photo-001-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "Looking straight up into maple trees in full autumn colour, orange on the left and yellow on the right, with a dark trunk cutting across.", "title": "Maple canopy", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-002", "src": "assets/photos/photo-002.jpg", "thumb": "assets/photos/photo-002-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "Maple branches seen from below, the leaves turning from green to deep crimson.", "title": "Turning red", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-003", "src": "assets/photos/photo-003.jpg", "thumb": "assets/photos/photo-003-sm.jpg", "w": 1751, "h": 1713, "tw": 720, "ratio": "1751 / 1713", "alt": "A large tree shading an empty picnic table on a lawn scattered with fallen leaves, with red and yellow trees beyond.", "title": "Picnic table", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-004", "src": "assets/photos/photo-004.jpg", "thumb": "assets/photos/photo-004-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A tall maple beside a street, turning red and orange from the top down against a clear blue sky, its fallen leaves on the grass.", "title": "Street maple", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-005", "src": "assets/photos/photo-005.jpg", "thumb": "assets/photos/photo-005-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "Close-up of a deep red pompon dahlia among green leaves and stems.", "title": "Dahlia", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-006", "src": "assets/photos/photo-006.jpg", "thumb": "assets/photos/photo-006-sm.jpg", "w": 1533, "h": 1957, "tw": 720, "ratio": "1533 / 1957", "alt": "A cluster of red pompon dahlias, some still in bud, growing tall in a sunny garden.", "title": "Dahlias", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-007", "src": "assets/photos/photo-007.jpg", "thumb": "assets/photos/photo-007-sm.jpg", "w": 1896, "h": 1582, "tw": 720, "ratio": "948 / 791", "alt": "A sky full of small rippled clouds lit gold and orange by the setting sun, with a single streetlight at the bottom.", "title": "Mackerel sky", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-008", "src": "assets/photos/photo-008.jpg", "thumb": "assets/photos/photo-008-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A blue and white floral mug on a sunlit wooden picnic table, with green trees behind.", "title": "Morning mug", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-009", "src": "assets/photos/photo-009.jpg", "thumb": "assets/photos/photo-009-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A Canada goose standing on grass, looking toward the camera, with a road and trees behind it.", "title": "Canada goose", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-010", "src": "assets/photos/photo-010.jpg", "thumb": "assets/photos/photo-010-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A busy downtown street with traffic lights, a glass pedestrian bridge and tall buildings, including an ornate stone tower on the right.", "title": "Downtown", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-011", "src": "assets/photos/photo-011.jpg", "thumb": "assets/photos/photo-011-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A modern glass building across a pond, seen through overhanging branches above a green lawn and footpath.", "title": "Across the pond", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-012", "src": "assets/photos/photo-012.jpg", "thumb": "assets/photos/photo-012-sm.jpg", "w": 2000, "h": 1500, "tw": 720, "ratio": "4 / 3", "alt": "A tall cumulus cloud glowing orange and pink at sunset against a purple-blue sky.", "title": "Sunset cumulus", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-013", "src": "assets/photos/photo-013.jpg", "thumb": "assets/photos/photo-013-sm.jpg", "w": 2000, "h": 1500, "tw": 720, "ratio": "4 / 3", "alt": "A passenger jet crossing a clear blue sky.", "title": "Passing over", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-014", "src": "assets/photos/photo-014.jpg", "thumb": "assets/photos/photo-014-sm.jpg", "w": 2000, "h": 1500, "tw": 720, "ratio": "4 / 3", "alt": "A still pond at night reflecting lit office buildings, with the moon glowing low in a hazy sky.", "title": "Night reflections", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-015", "src": "assets/photos/photo-015.jpg", "thumb": "assets/photos/photo-015-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A long, straight small-town main street dipping downhill and rising on the far side, lined with shops, parked cars and trees.", "title": "Main street", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-016", "src": "assets/photos/photo-016.jpg", "thumb": "assets/photos/photo-016-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A man in a hat walking a golden retriever along a sandy beach, with sunlit water stretching to the horizon.", "title": "Shoreline walk", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-017", "src": "assets/photos/photo-017.jpg", "thumb": "assets/photos/photo-017-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "Shallow rapids running over a rocky riverbed under a deep blue sky, with forest on the far bank.", "title": "Rapids", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-018", "src": "assets/photos/photo-018.jpg", "thumb": "assets/photos/photo-018-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A white folding garden chair on bright green grass beside a weathered wooden fence.", "title": "Garden chair", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-019", "src": "assets/photos/photo-019.jpg", "thumb": "assets/photos/photo-019-sm.jpg", "w": 2000, "h": 1500, "tw": 720, "ratio": "4 / 3", "alt": "A misty lake with a single waterbird on still water and a tree-lined shore fading into the fog.", "title": "Fog", "place": "", "year": "2026", "note": ""},
+    {"id": "photo-020", "src": "assets/photos/photo-020.jpg", "thumb": "assets/photos/photo-020-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A dense school of silver fish swirling through blue aquarium water.", "title": "School of fish", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-021", "src": "assets/photos/photo-021.jpg", "thumb": "assets/photos/photo-021-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "The CN Tower rising between glass towers, seen from a downtown street.", "title": "CN Tower", "place": "Toronto", "year": "2025", "note": ""},
+    {"id": "photo-022", "src": "assets/photos/photo-022.jpg", "thumb": "assets/photos/photo-022-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "The CN Tower beside a curved glass skyscraper and an older stone building with columns, under a sky of scattered clouds.", "title": "Old and new", "place": "Toronto", "year": "2025", "note": ""},
+    {"id": "photo-023", "src": "assets/photos/photo-023.jpg", "thumb": "assets/photos/photo-023-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A thin crescent moon with a bright planet beside it in a dark blue sky, above silhouetted trees.", "title": "Before sunrise", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-025", "src": "assets/photos/photo-025.jpg", "thumb": "assets/photos/photo-025-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "The sun dipping behind silhouetted trees, under a wide sky of golden and grey clouds.", "title": "Last light", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-026", "src": "assets/photos/photo-026.jpg", "thumb": "assets/photos/photo-026-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A half moon glowing deep orange in a black night sky.", "title": "Orange moon", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-027", "src": "assets/photos/photo-027.jpg", "thumb": "assets/photos/photo-027-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A thin crescent moon in a patch of deep blue sky, framed by clouds lit pink and gold.", "title": "Crescent", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-028", "src": "assets/photos/photo-028.jpg", "thumb": "assets/photos/photo-028-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A grey squirrel sitting upright at the base of a tree trunk, its tail curled up behind it, in tall green grass.", "title": "Watchful", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-029", "src": "assets/photos/photo-029.jpg", "thumb": "assets/photos/photo-029-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "The sun setting over a lake, framed by dark tree branches, its reflection on the water and a small building on the shore.", "title": "Lakeside sunset", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-030", "src": "assets/photos/photo-030.jpg", "thumb": "assets/photos/photo-030-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "Canada geese grazing on a wide lawn in warm evening light, one in the foreground, with tall evergreens behind.", "title": "Grazing geese", "place": "", "year": "2025", "note": ""},
+    {"id": "photo-031", "src": "assets/photos/photo-031.jpg", "thumb": "assets/photos/photo-031-sm.jpg", "w": 1500, "h": 2000, "tw": 720, "ratio": "3 / 4", "alt": "A wide, calm river between wooded banks under a blue sky with puffy white clouds.", "title": "Riverbend", "place": "", "year": "2025", "note": ""}
   ];
+  // PHOTOS-END
 })(typeof window !== "undefined" ? window : globalThis);
