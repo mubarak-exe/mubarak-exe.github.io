@@ -1003,6 +1003,12 @@ body:has(dialog.viewer[open]) { overflow: hidden; }
 .creative-card:hover { border-color: var(--accent); transform: translateY(-3px); text-decoration: none; }
 .creative-card:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; }
 .creative-art { display: block; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface-2); }
+/* Both cards fit on screen when the page opens: the picture area follows the window height
+   (window minus menu, title and card text), between 200 and 460 px. */
+.calm-hero.creative-hero { padding-bottom: clamp(20px, 2.5vw, 32px); }
+@media (min-width: 760px) {
+  .creative-art { aspect-ratio: auto; height: clamp(200px, calc(100vh - 445px), 460px); height: clamp(200px, calc(100svh - 445px), 460px); }
+}
 .poem-art { display: grid; place-items: center; padding: clamp(24px, 5vw, 48px); }
 .poem-art-text { font-family: var(--serif); font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.65; white-space: pre-line; color: var(--ink); }
 .photo-art { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }

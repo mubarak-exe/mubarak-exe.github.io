@@ -925,7 +925,7 @@
     const excerpt = f ? f.stanzas[0].split("\n").slice(0, 4).join("\n") : "";
     const strip = photos.filter(p => photoAspect(p) < 1.3).sort(() => Math.random() - 0.5).slice(0, 3);
     return `
-<section class="wrap page-hero calm-hero" aria-labelledby="creative-title">
+<section class="wrap page-hero calm-hero creative-hero" aria-labelledby="creative-title">
   <p class="kicker dash">Beyond research</p>
   <h1 class="serif-title lines" id="creative-title" tabindex="-1">${lines(["Creative"])}</h1>
 </section>
