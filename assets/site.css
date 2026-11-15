@@ -948,3 +948,14 @@ main.fade-in { animation: vt-in 0.5s var(--ease) both; }
 .work-row .cv-car { r: 2.4; opacity: 0.8; }
 .work-row .cv-pin { r: 11; }
 .work-row .cv-pin-t { font-weight: 700; font-size: 12px; }
+/* Project cards: smaller picture, larger, more readable text (2026-11-15) */
+@media (min-width: 880px) {
+  .work-row { grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 40px; padding: 22px 36px 22px 22px; align-items: center; }
+}
+.work-row .work-cover { aspect-ratio: 16 / 10; max-width: 460px; }   /* the drawings' own shape, so nothing is cropped */
+.work-row .work-meta { font-size: 0.95rem; }
+.work-title { font-size: clamp(1.6rem, 2.4vw, 2rem); }
+.work-row .work-hook { font-size: clamp(1.06rem, 1.3vw, 1.15rem); line-height: 1.7; max-width: 44em; color: color-mix(in srgb, var(--ink) 78%, var(--muted)); }
+.work-metric strong { font-size: 1.12rem; }
+.work-metric small { font-size: 1rem; }
+.work-row .work-cta { font-size: 1rem; }
