@@ -269,14 +269,22 @@
       const minCol = W < 560 ? 140 : 220;
       const cols = Math.max(2, Math.min(4, Math.floor((W + gapX) / (minCol + gapX))));
       const colW = (W - gapX * (cols - 1)) / cols;
-      items.forEach(it => { it.style.width = colW + "px"; });
+      const wide = it => it.dataset.wide === "1";   // wide photos span two columns
+      items.forEach(it => { it.style.width = (wide(it) ? 2 * colW + gapX : colW) + "px"; });
       const hs = items.map(it => it.offsetHeight);
       const heights = new Array(cols).fill(0);
       items.forEach((it, i) => {
-        let c = 0;
-        for (let k = 1; k < cols; k++) if (heights[k] < heights[c] - 1) c = k;
-        it.style.transform = `translate(${Math.round(c * (colW + gapX))}px, ${Math.round(heights[c])}px)`;
-        heights[c] += hs[i] + gapY;
+        let c = 0, top;
+        if (wide(it)) {   // the two neighbouring columns whose lower one is highest up
+          top = Infinity;
+          for (let k = 0; k < cols - 1; k++) { const t = Math.max(heights[k], heights[k + 1]); if (t < top - 1) { top = t; c = k; } }
+          heights[c] = heights[c + 1] = top + hs[i] + gapY;
+        } else {
+          for (let k = 1; k < cols; k++) if (heights[k] < heights[c] - 1) c = k;
+          top = heights[c];
+          heights[c] += hs[i] + gapY;
+        }
+        it.style.transform = `translate(${Math.round(c * (colW + gapX))}px, ${Math.round(top)}px)`;
       });
       grid.style.height = Math.max(0, Math.max.apply(null, heights) - gapY) + "px";
     };
