@@ -699,7 +699,57 @@
     return `<li class="ph-item"><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}</span>${cap}</button></li>`;
   }
 
+  // Collage order: a fresh mix on every visit that keeps neighbouring photos different in colour,
+  // brightness and shape, so similar shots (two moons, two autumn trees) never sit side by side.
+  // Each photo's tone ([hue, saturation, brightness]) is measured by scripts/add-photos.py.
+  function mixPhotos(list) {
+    const real = list.filter(p => p.src), rest = list.filter(p => !p.src);
+    if (real.length < 3) return list;
+    // Each photo's numbers, worked out once: hue, saturation, brightness and log of its shape.
+    const feat = new Map(real.map(p => {
+      const [a, b] = String(p.ratio || "1 / 1").split("/").map(parseFloat), [h, s, v] = p.tone || [0, 0, 0.5];
+      return [p, { h, s, v, r: Math.log(a && b ? a / b : 1) }];
+    }));
+    const diff = (p, q) => {
+      const A = feat.get(p), B = feat.get(q), dh = Math.min(Math.abs(A.h - B.h), 360 - Math.abs(A.h - B.h)) / 180;
+      return 1.6 * dh * Math.min(A.s, B.s) + 1.4 * Math.abs(A.v - B.v) + 0.6 * Math.abs(A.s - B.s) + 0.5 * Math.abs(A.r - B.r);
+    };
+    // Plan with the real columns: the grid (setupMasonry in app.js) drops each photo into the shortest
+    // column, so the mix does the same with estimated tile heights (photo shape + caption) and picks each
+    // photo to differ from the one directly above it and the ones at the bottom of the columns beside it.
+    const cols = columnsGuess();
+    function arrange() {
+      const pool = real.slice(), out = [], heights = new Array(cols).fill(0), last = new Array(cols).fill(null);
+      let clash = 0;
+      while (pool.length) {
+        let c = 0;
+        for (let k = 1; k < cols; k++) if (heights[k] < heights[c] - 1e-6) c = k;
+        const near = [last[c], last[c - 1], last[c + 1]].filter(Boolean);
+        let i = Math.floor(Math.random() * pool.length);
+        if (near.length) {
+          const scored = pool.map((p, j) => ({ j, s: Math.min(...near.map(q => diff(p, q))) })).sort((a, b) => b.s - a.s);
+          i = scored[Math.floor(Math.random() * Math.min(3, scored.length))].j;
+        }
+        const p = pool.splice(i, 1)[0];
+        near.forEach(q => { clash += Math.exp(-3 * diff(p, q)); });   // how much look-alikes touch (lower is better)
+        out.push(p); last[c] = p;
+        heights[c] += Math.exp(-feat.get(p).r) + 0.18;               // height / width, plus caption and gap
+      }
+      return { out, clash };
+    }
+    let best = null;
+    for (let k = 0; k < 8; k++) { const a = arrange(); if (!best || a.clash < best.clash) best = a; }
+    return best.out.concat(rest);
+  }
+  // The column count the grid will use (same rule as setupMasonry in app.js).
+  function columnsGuess() {
+    const vw = typeof window !== "undefined" && window.innerWidth ? window.innerWidth : 1280;
+    const gutter = vw >= 1100 ? 48 : vw >= 720 ? 32 : 16, W = Math.min(vw, 1280) - 2 * gutter, gap = 12;
+    return Math.max(2, Math.min(4, Math.floor((W + gap) / ((W < 560 ? 140 : 220) + gap))));
+  }
+
   V.photography = function () {
+    SITE.photos = mixPhotos(SITE.photos);
     const page = SITE.photographyPage;
     return `
 <section class="wrap page-hero calm-hero" aria-labelledby="photo-title">
