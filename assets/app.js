@@ -248,10 +248,12 @@
   }
 
   /* ---------------- Photography: collage ----------------
-     Without JavaScript the grid falls back to CSS columns. With it, every photo keeps its true shape
-     and about the same area: tall photos a quarter of the desktop width, wide photos a third (full
-     width on phones). Photos stack neatly into the grid of SITE.collage (views.js), each placed where
-     it sits highest without leaving gaps; the bottom edge is left ragged. */
+     Without JavaScript the grid falls back to CSS columns. With it: equal columns (SITE.collage in
+     views.js), photos at their natural height. A tall photo goes into the shortest column; a wide photo
+     spans two neighbouring columns, on the pair whose lower top is highest. The mix (views.js) only
+     sends a wide photo when two columns end level; any small difference left is closed by making the
+     last photo of the shorter column that much taller (it fills its frame, trimming a sliver), so a
+     wide photo never leaves a gap under it. The bottom edge is ragged. */
   function setupMasonry() {
     const grid = main.querySelector("[data-masonry]");
     if (!grid) return;
@@ -268,13 +270,46 @@
       // parseFloat can't read from the raw custom property).
       const cs = getComputedStyle(grid);
       const gapX = parseFloat(cs.columnGap) || 8, gapY = parseFloat(cs.rowGap) || 8;
-      const pk = SITE.collage.packer(W, gapX, gapY);
+      const C = SITE.collage, cols = C.cols(W), colW = (W - gapX * (cols - 1)) / cols;
+      const H = new Array(cols).fill(0), last = new Array(cols).fill(null);
+      // Make the last photo in column k d px taller, if it is the last photo in all its columns and
+      // the stretch is small (it then fills its frame, trimming a sliver off its edges).
+      const canStretch = (k, d) => d <= 0.5 || (!!last[k] && d <= 0.4 * last[k].h && last[k].cols.every(c => last[c] === last[k]));
+      const stretch = (k, d) => {
+        const L = last[k];
+        if (d <= 0.5 || !canStretch(k, d)) return;
+        L.h += d;
+        L.frame.style.height = L.h + "px";
+        L.cols.forEach(c => { H[c] += d; });
+      };
+      // The pair a wide photo goes on (SITE.collage.pair), or, if a difference there can't be closed,
+      // the best pair where it can.
+      const pairFor = () => {
+        const order = [];
+        for (let k = 0; k < cols - 1; k++) order.push({ k, s: Math.max(H[k], H[k + 1]) + 3 * Math.abs(H[k] - H[k + 1]) });
+        order.sort((a, b) => a.s - b.s);
+        const ok = order.find(({ k }) => { const t = Math.max(H[k], H[k + 1]); return canStretch(k, t - H[k]) && canStretch(k + 1, t - H[k + 1]); });
+        return ok ? ok.k : -1;   // -1: nowhere without a gap, so it goes in one column instead
+      };
       items.forEach((it, i) => {
-        const t = pk.place(ar[i], pk.fit(ar[i]), true);
-        it.style.width = t.w + "px";
-        it.style.transform = `translate(${Math.round(t.x)}px, ${Math.round(t.y)}px)`;
+        const frame = it.querySelector(".ph-frame");
+        if (frame) frame.style.height = "";
+        let c = 0, span = 1, top;
+        const pc = C.wide(ar[i]) ? pairFor() : -1;
+        if (pc >= 0) {
+          span = 2; c = pc; top = Math.max(H[c], H[c + 1]);
+          for (const k of [c, c + 1]) stretch(k, top - H[k]);
+          top = Math.max(H[c], H[c + 1]);
+        } else {
+          for (let k = 1; k < cols; k++) if (H[k] < H[c] - 0.5) c = k;
+          top = H[c];
+        }
+        const w = span * colW + (span - 1) * gapX, h = w / ar[i], tile = { frame, h, cols: span === 2 ? [c, c + 1] : [c] };
+        it.style.width = w + "px";
+        it.style.transform = `translate(${Math.round(c * (colW + gapX))}px, ${Math.round(top)}px)`;
+        tile.cols.forEach(k => { H[k] = top + h + gapY; last[k] = tile; });
       });
-      grid.style.height = pk.height() + "px";
+      grid.style.height = Math.max(0, Math.max.apply(null, H) - gapY) + "px";
     };
     const schedule = force => { if (!raf) raf = requestAnimationFrame(() => layout(force)); };
     layout(true);
