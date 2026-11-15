@@ -12,7 +12,7 @@
   const reduced = () => reduceMQ.matches;
   const canVT = () => typeof doc.startViewTransition === "function" && !reduced();
   const NAME = SITE.person.name;
-  const PAGES = { home: "Home", work: "Work", thinking: "Thinking", poems: "Poems", photography: "Photography", about: "About", contact: "Contact" };
+  const PAGES = { home: "Home", work: "Work", thinking: "Thinking", creative: "Creative", poems: "Poems", photography: "Photography", about: "About", contact: "Contact" };
   const PROJECTS = Object.fromEntries(SITE.projects.map(p => [p.id, p]));
   const NOTES = Object.fromEntries(SITE.notes.map(n => [n.id, n]));
   const POEMS = Object.fromEntries((SITE.poems || []).map(p => [p.id, p]));
@@ -55,7 +55,7 @@
       main.innerHTML = r.html();
       main.dataset.view = r.view;
       doc.title = r.title;
-      setNav(r.view === "project" ? "work" : r.view === "note" ? "thinking" : r.view === "poem" ? "poems" : r.view);
+      setNav(r.view === "project" ? "work" : r.view === "note" ? "thinking" : ["poem", "poems", "photography"].includes(r.view) ? "creative" : r.view);
       g.scrollTo(0, 0);
       enhance(r);
     };
@@ -576,7 +576,7 @@
   /* ---------------- Photo protection ----------------
      Deterrents only (a browser has to download an image to show it, so nothing can make saving
      impossible): no right-click / long-press "Save image" menu and no dragging photos out of the page. */
-  const onPhoto = e => e.target.closest && e.target.closest(".ph-frame, .viewer-frame");
+  const onPhoto = e => e.target.closest && e.target.closest(".ph-frame, .viewer-frame, .photo-art");
   doc.addEventListener("contextmenu", e => { if (onPhoto(e)) { e.preventDefault(); toast("Photos © Mubarak Shikalgar"); } });
   doc.addEventListener("dragstart", e => { if (onPhoto(e)) e.preventDefault(); });
 

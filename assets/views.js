@@ -623,6 +623,7 @@
     const excerpt = f.stanzas[0].split("\n").slice(0, 4).join("\n");
     return `
 <section class="wrap page-hero calm-hero" aria-labelledby="poems-title">
+  <a class="back-link" href="#creative"><span aria-hidden="true">←</span> Creative</a>
   <p class="kicker dash">${page.kicker}</p>
   <h1 class="serif-title lines" id="poems-title" tabindex="-1">${lines([page.title])}</h1>
   ${page.lede ? `<p class="calm-lede">${page.lede}</p>` : ""}
@@ -806,11 +807,36 @@
     }
   };
 
+  // Creative: one menu item for the poems and the photographs.
+  V.creative = function () {
+    const P = SITE.poems || [], photos = (SITE.photos || []).filter(p => p.src);
+    const f = P.find(p => p.featured) || P[0];
+    const excerpt = f ? f.stanzas[0].split("\n").slice(0, 4).join("\n") : "";
+    const strip = photos.filter(p => photoAspect(p) < 1.3).sort(() => Math.random() - 0.5).slice(0, 3);
+    return `
+<section class="wrap page-hero calm-hero" aria-labelledby="creative-title">
+  <p class="kicker dash">Beyond research</p>
+  <h1 class="serif-title lines" id="creative-title" tabindex="-1">${lines(["Creative"])}</h1>
+</section>
+<section class="wrap creative-grid" aria-label="Creative work">
+  <a class="creative-card rv" href="#poems">
+    <span class="creative-art poem-art"><span class="poem-art-text">${esc(excerpt)}</span></span>
+    <span class="creative-body"><span class="kicker">${esc(SITE.poemsPage.kicker)}</span><span class="creative-title">Poems</span><span class="mono-sm">${P.length} ${P.length === 1 ? "poem" : "poems"} ${ARR}</span></span>
+  </a>
+  <a class="creative-card rv" href="#photography">
+    <span class="creative-art photo-art">${strip.map(p => `<img src="${esc(p.thumb || p.src)}" alt="" loading="lazy" decoding="async">`).join("")}</span>
+    <span class="creative-body"><span class="kicker">${esc(SITE.photographyPage.kicker)}</span><span class="creative-title">Photography</span><span class="mono-sm">${photos.length} photographs ${ARR}</span></span>
+  </a>
+</section>
+<div class="calm-end"></div>`;
+  };
+
   V.photography = function () {
     SITE.photos = mixPhotos(SITE.photos);
     const page = SITE.photographyPage;
     return `
 <section class="wrap page-hero calm-hero" aria-labelledby="photo-title">
+  <a class="back-link" href="#creative"><span aria-hidden="true">←</span> Creative</a>
   <p class="kicker dash">${page.kicker}</p>
   <h1 class="serif-title lines" id="photo-title" tabindex="-1">${lines([page.title])}</h1>
   ${page.lede ? `<p class="calm-lede">${page.lede}</p>` : ""}

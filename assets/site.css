@@ -157,8 +157,8 @@ kbd {
 }
 @media (min-width: 640px) { .kbd-label, .kbd-btn kbd { display: inline; } .kbd-btn { padding: 0 8px 0 12px; } }
 /* Six links fit in the header from 1120px; narrower screens use the menu button. */
-@media (min-width: 1120px) { .nav { display: flex; } .menu-btn { display: none; } }
-@media (min-width: 1120px) and (max-width: 1279px) { .kbd-label { display: none; } }
+@media (min-width: 1000px) { .nav { display: flex; } .menu-btn { display: none; } }
+@media (min-width: 1000px) and (max-width: 1279px) { .kbd-label { display: none; } }
 
 .mobile-menu {
   position: fixed; inset: 0; z-index: 45; background: var(--bg);
@@ -740,6 +740,20 @@ body:has(dialog.viewer[open]) { overflow: hidden; }
 .ph-meta { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 246, 248, 0.8); }
 /* Photo protection (with app.js): no dragging, selecting or iOS long-press "Save image" on photos. */
 .ph-frame img, .viewer-frame img { -webkit-user-drag: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+/* Creative: two large cards, Poems and Photography. */
+.creative-grid { display: grid; gap: clamp(16px, 2.5vw, 28px); }
+@media (min-width: 760px) { .creative-grid { grid-template-columns: 1fr 1fr; } }
+.creative-card { display: grid; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); color: var(--ink); text-decoration: none; transition: border-color 0.2s, transform 0.3s var(--ease); }
+.creative-card:hover { border-color: var(--accent); transform: translateY(-3px); text-decoration: none; }
+.creative-card:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 3px; }
+.creative-art { display: block; aspect-ratio: 4 / 3; overflow: hidden; background: var(--surface-2); }
+.poem-art { display: grid; place-items: center; padding: clamp(24px, 5vw, 48px); }
+.poem-art-text { font-family: var(--serif); font-size: clamp(1.1rem, 2vw, 1.4rem); line-height: 1.65; white-space: pre-line; color: var(--ink); }
+.photo-art { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.photo-art img { display: block; width: 100%; height: 100%; object-fit: cover; -webkit-user-drag: none; user-select: none; -webkit-touch-callout: none; }
+.creative-body { display: grid; gap: 6px; padding: 18px 20px 22px; }
+.creative-title { font-family: var(--serif); font-size: clamp(1.5rem, 2.4vw, 1.9rem); line-height: 1.2; }
+.creative-body .mono-sm { display: inline-flex; align-items: center; gap: 6px; }
 .rights-note { margin: 22px 0 0; font-family: var(--mono); font-size: 0.7rem; line-height: 1.6; letter-spacing: 0.03em; color: var(--muted); }
 /* Narrow tiles (tall photos on phones): smaller title, no year, so the caption doesn't wrap onto the photo. */
 .ph-frame { container-type: inline-size; }
