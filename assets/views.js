@@ -644,6 +644,7 @@
     const showFirst = !first.toLowerCase().startsWith(p.title.toLowerCase());
     return `<li class="rv"><a class="poem-row" href="#${p.id}"><span class="poem-num">${pad2(i + 1)}</span><span class="poem-row-main"><span class="poem-row-title">${esc(p.title)}</span>${showFirst ? `<span class="poem-row-first">${esc(first)}</span>` : ""}</span><span class="poem-row-meta">${poemLineCount(p)} lines</span></a></li>`;
   }).join("")}</ol>
+  <p class="rights-note">Poems © 2026 Mubarak Shikalgar, except lines credited to other authors. All rights reserved. Please don't reuse or reproduce them without permission.</p>
 </section>
 <div class="calm-end"></div>`;
   };
@@ -669,6 +670,7 @@
     <span class="poem-rule" aria-hidden="true"></span>
     <div class="poem-text">${p.stanzas.map(s => `<p>${esc(s)}</p>`).join("")}</div>
     <div class="poem-actions">${appreciateBtn(p.id)}<button class="appreciate" type="button" data-copy-link>${LINK_ICON}<span>Copy link</span></button></div>
+    <p class="rights-note">© 2026 Mubarak Shikalgar${p.credit ? ", except lines credited to other authors" : ""}. All rights reserved.</p>
   </div>
   ${pager}
 </article>`;
@@ -757,6 +759,7 @@
 </section>
 <section class="wrap" aria-label="Photographs">
   <ul class="masonry" data-masonry>${SITE.photos.map(photoTile).join("")}</ul>
+  <p class="rights-note">All photographs © 2026 Mubarak Shikalgar. All rights reserved. Please don't reuse or reproduce them without permission.</p>
 </section>
 <div class="calm-end"></div>
 <dialog class="viewer" id="photo-viewer" aria-label="Photo viewer">
