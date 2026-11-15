@@ -733,7 +733,10 @@
     const cols = COLLAGE.cols(Math.min(vw, 1280) - 2 * gutter), GAP = 0.035, TOL = COLLAGE.TOL;
     const isW = q => !!q && feat.get(q).wide;
     const nWide = real.filter(isW).length;
-    const minGap = nWide ? Math.max(2, Math.floor((real.length / (nWide + 1)) * 0.6)) : 0;
+    // The last few rows are kept for tall photos, so a wide photo never ends up in the bottom row:
+    // wide photos are spread over the photos before this reserve.
+    const reserve = Math.min(Math.floor(real.length * 0.25), 3 * cols), spread = Math.max(1, real.length - reserve);
+    const minGap = nWide ? Math.max(2, Math.floor((spread / (nWide + 1)) * 0.6)) : 0;
     function arrange() {
       const pool = real.slice(), out = [], H = new Array(cols).fill(0), last = new Array(cols).fill(null);
       let clash = 0, sinceWide = 99, lastPair = -1;
@@ -743,16 +746,19 @@
         for (let k = 1; k < cols; k++) if (H[k] < H[c1] - 1e-6) c1 = k;
         const c2 = COLLAGE.pair(H), top2 = Math.max(H[c2], H[c2 + 1]);
         const level = Math.abs(H[c2] - H[c2 + 1]) <= TOL, stacked = isW(last[c2]) || isW(last[c2 + 1]);
-        const widesLeft = pool.some(isW), tallsLeft = pool.some(p => !isW(p));
-        // How far wide photos are behind an even spread down the page.
-        const behind = ((out.length + 1) * nWide) / real.length - placedWide;
+        const widesLeft = pool.some(isW), tallsLeft = pool.filter(p => !isW(p)).length;
+        // How far wide photos are behind an even spread down the page (above the reserved last rows).
+        const behind = ((out.length + 1) * nWide) / spread - placedWide;
+        // Reserve reached: place wide photos now (but still never right on top of another wide photo).
+        const urgent = widesLeft && tallsLeft <= reserve && !stacked;
         const scored = [];
         pool.forEach((p, j) => {
           const F = feat.get(p);
-          if (F.wide && tallsLeft && (!level || stacked)) return;   // wait for a level, free pair of columns
+          if (F.wide && tallsLeft && !urgent && (!level || stacked)) return;   // wait for a level, free pair of columns
+          if (!F.wide && urgent) return;                                        // wide photos first, before the last rows
           const near = (F.wide ? [last[c2], last[c2 + 1], last[c2 - 1], last[c2 + 2]] : [last[c1], last[c1 - 1], last[c1 + 1]]).filter(Boolean);
           let s = near.length ? Math.min(...near.map(q => diff(p, q))) : 1;
-          if (F.wide) s += (behind > 0.5 ? 1.5 : 0) - (sinceWide < minGap && behind < 0.5 ? 1 : 0) - (c2 === lastPair ? 0.5 : 0);
+          if (F.wide) s += (behind > 0.5 ? 1.5 : 0) - (sinceWide < minGap && behind < 0.5 ? 1 : 0) - (c2 === lastPair ? 0.5 : 0) - (stacked ? 3 : 0);
           else if (widesLeft) {   // bonus for making this column level with a neighbour, bigger when wide photos are behind
             const nh = H[c1] + 1 / F.ar + GAP;
             if ([c1 - 1, c1 + 1].some(k => k >= 0 && k < cols && Math.abs(H[k] - nh) <= TOL && !isW(last[k]))) s += behind > 0.5 ? 2 : 0.35;
@@ -772,10 +778,12 @@
         }
         out.push(p);
       }
+      // A wide photo at the bottom of either of its columns would sit in the last row: rule it out.
+      if (last.some(isW)) clash += 100;
       return { out, clash };
     }
     let best = null;
-    for (let k = 0; k < 8; k++) { const a = arrange(); if (!best || a.clash < best.clash) best = a; }
+    for (let k = 0; k < 40 && (k < 8 || best.clash >= 100); k++) { const a = arrange(); if (!best || a.clash < best.clash) best = a; }
     return best.out.concat(rest);
   }
 

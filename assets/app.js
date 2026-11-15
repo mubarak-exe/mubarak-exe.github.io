@@ -271,45 +271,59 @@
       const cs = getComputedStyle(grid);
       const gapX = parseFloat(cs.columnGap) || 8, gapY = parseFloat(cs.rowGap) || 8;
       const C = SITE.collage, cols = C.cols(W), colW = (W - gapX * (cols - 1)) / cols;
-      const H = new Array(cols).fill(0), last = new Array(cols).fill(null);
-      // Make the last photo in column k d px taller, if it is the last photo in all its columns and
-      // the stretch is small (it then fills its frame, trimming a sliver off its edges).
-      const canStretch = (k, d) => d <= 0.5 || (!!last[k] && d <= 0.4 * last[k].h && last[k].cols.every(c => last[c] === last[k]));
-      const stretch = (k, d) => {
-        const L = last[k];
-        if (d <= 0.5 || !canStretch(k, d)) return;
-        L.h += d;
-        L.frame.style.height = L.h + "px";
-        L.cols.forEach(c => { H[c] += d; });
+      // Works out every tile's place; photos in `narrow` are shown one column wide.
+      const plan = narrow => {
+        const H = new Array(cols).fill(0), last = new Array(cols).fill(null), tiles = [];
+        // Make the last photo in column k d px taller, if it is the last photo in all its columns and
+        // the stretch is small (it then fills its frame, trimming a sliver off its edges).
+        const canStretch = (k, d) => d <= 0.5 || (!!last[k] && d <= 0.4 * last[k].h && last[k].cols.every(c => last[c] === last[k]));
+        const stretch = (k, d) => {
+          const L = last[k];
+          if (d <= 0.5 || !canStretch(k, d)) return;
+          L.h += d; L.stretched = true;
+          L.cols.forEach(c => { H[c] += d; });
+        };
+        // The pair a wide photo goes on (SITE.collage.pair), or, if a difference there can't be closed,
+        // the best pair where it can.
+        const pairFor = () => {
+          const order = [];
+          for (let k = 0; k < cols - 1; k++) order.push({ k, s: Math.max(H[k], H[k + 1]) + 3 * Math.abs(H[k] - H[k + 1]) });
+          order.sort((a, b) => a.s - b.s);
+          const ok = order.find(({ k }) => { const t = Math.max(H[k], H[k + 1]); return canStretch(k, t - H[k]) && canStretch(k + 1, t - H[k + 1]); });
+          return ok ? ok.k : -1;   // -1: nowhere without a gap, so it goes in one column instead
+        };
+        items.forEach((it, i) => {
+          let c = 0, span = 1, top;
+          const pc = C.wide(ar[i]) && !narrow.has(i) ? pairFor() : -1;
+          if (pc >= 0) {
+            span = 2; c = pc; top = Math.max(H[c], H[c + 1]);
+            for (const k of [c, c + 1]) stretch(k, top - H[k]);
+            top = Math.max(H[c], H[c + 1]);
+          } else {
+            for (let k = 1; k < cols; k++) if (H[k] < H[c] - 0.5) c = k;
+            top = H[c];
+          }
+          const w = span * colW + (span - 1) * gapX;
+          const tile = { i, x: c * (colW + gapX), y: top, w, h: w / ar[i], cols: span === 2 ? [c, c + 1] : [c], wide: span === 2 };
+          tile.cols.forEach(k => { H[k] = top + tile.h + gapY; last[k] = tile; });
+          tiles.push(tile);
+        });
+        return { tiles, last, height: Math.max(0, Math.max.apply(null, H) - gapY) };
       };
-      // The pair a wide photo goes on (SITE.collage.pair), or, if a difference there can't be closed,
-      // the best pair where it can.
-      const pairFor = () => {
-        const order = [];
-        for (let k = 0; k < cols - 1; k++) order.push({ k, s: Math.max(H[k], H[k + 1]) + 3 * Math.abs(H[k] - H[k + 1]) });
-        order.sort((a, b) => a.s - b.s);
-        const ok = order.find(({ k }) => { const t = Math.max(H[k], H[k + 1]); return canStretch(k, t - H[k]) && canStretch(k + 1, t - H[k + 1]); });
-        return ok ? ok.k : -1;   // -1: nowhere without a gap, so it goes in one column instead
-      };
-      items.forEach((it, i) => {
-        const frame = it.querySelector(".ph-frame");
-        if (frame) frame.style.height = "";
-        let c = 0, span = 1, top;
-        const pc = C.wide(ar[i]) ? pairFor() : -1;
-        if (pc >= 0) {
-          span = 2; c = pc; top = Math.max(H[c], H[c + 1]);
-          for (const k of [c, c + 1]) stretch(k, top - H[k]);
-          top = Math.max(H[c], H[c + 1]);
-        } else {
-          for (let k = 1; k < cols; k++) if (H[k] < H[c] - 0.5) c = k;
-          top = H[c];
-        }
-        const w = span * colW + (span - 1) * gapX, h = w / ar[i], tile = { frame, h, cols: span === 2 ? [c, c + 1] : [c] };
-        it.style.width = w + "px";
-        it.style.transform = `translate(${Math.round(c * (colW + gapX))}px, ${Math.round(top)}px)`;
-        tile.cols.forEach(k => { H[k] = top + h + gapY; last[k] = tile; });
+      // A wide photo must never sit in the bottom row: if one does, show it one column wide and redo.
+      const narrow = new Set();
+      let res = plan(narrow);
+      for (let n = 0; n < 4 && res.last.some(t => t && t.wide); n++) {
+        res.last.forEach(t => { if (t && t.wide) narrow.add(t.i); });
+        res = plan(narrow);
+      }
+      res.tiles.forEach(t => {
+        const it = items[t.i], frame = it.querySelector(".ph-frame");
+        if (frame) frame.style.height = t.stretched ? t.h + "px" : "";
+        it.style.width = t.w + "px";
+        it.style.transform = `translate(${Math.round(t.x)}px, ${Math.round(t.y)}px)`;
       });
-      grid.style.height = Math.max(0, Math.max.apply(null, H) - gapY) + "px";
+      grid.style.height = res.height + "px";
     };
     const schedule = force => { if (!raf) raf = requestAnimationFrame(() => layout(force)); };
     layout(true);
