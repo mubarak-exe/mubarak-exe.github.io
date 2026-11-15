@@ -328,11 +328,11 @@
   function noteCard(n) {
     const i = SITE.notes.indexOf(n);
     return `<a class="note-card rv" href="#${n.id}">
-      <span class="note-card-top"><span class="kicker">Note ${pad2(i + 1)}</span><span class="note-time">${readMins(n)} min read</span></span>
+      <span class="note-card-top"><span class="kicker">Finding ${pad2(i + 1)}</span><span class="note-time">${readMins(n)} min read</span></span>
       <h3>${n.title}</h3>
       <p>${n.dek}</p>
       <span class="tag-row">${n.tags.map(t => `<span>${t}</span>`).join("")}</span>
-      <span class="note-card-cta">Read the note ${ARR}</span>
+      <span class="note-card-cta">Read the finding ${ARR}</span>
     </a>`;
   }
 
@@ -393,10 +393,10 @@
 <section class="wrap section" aria-labelledby="think-title">
   <div class="think-grid">
     <div class="think-intro">
-      <p class="kicker dash">Thinking</p>
+      <p class="kicker dash">Methodology</p>
       <h2 class="display section-title" id="think-title">How I do research.</h2>
-      <p class="section-lede">Five rules I work by, each backed by a result from a real project. Then notes that go deeper.</p>
-      <a class="more-link" href="#thinking">Read the method ${ARR}</a>
+      <p class="section-lede">Five rules I work by, each backed by a result from a real project. Then findings that go deeper.</p>
+      <a class="more-link" href="#thinking">Read the methodology ${ARR}</a>
     </div>
     <ol class="steps-mini">${SITE.process.map((s, k) => `<li><a href="#thinking" data-step-link="${k}"><span class="n">${pad2(k + 1)}</span><span class="t">${s.title}</span>${ARR}</a></li>`).join("")}</ol>
   </div>
@@ -466,14 +466,14 @@
     const steps = SITE.process;
     return `
 <section class="wrap page-hero" aria-labelledby="thinking-title">
-  <p class="kicker dash">Thinking</p>
+  <p class="kicker dash">Methodology</p>
   <h1 class="display page-title lines" id="thinking-title" tabindex="-1">${lines(["How I do", "research, and", "what it taught me."])}</h1>
-  <p class="page-lede">First, the method: five rules I work by, each backed by a result from a real project. Then research notes that go deeper into individual findings.</p>
-  <div class="jump-row"><button class="btn" type="button" data-goto="process">The method ${DOWN}</button><button class="btn" type="button" data-goto="notes">Research notes ${DOWN}</button></div>
+  <p class="page-lede">First, the methodology: five rules I work by, each backed by a result from a real project. Then findings that go deeper into individual results.</p>
+  <div class="jump-row"><button class="btn" type="button" data-goto="process">Methodology ${DOWN}</button><button class="btn" type="button" data-goto="notes">Findings ${DOWN}</button></div>
 </section>
 
 <section class="wrap" id="process" aria-labelledby="process-title" style="scroll-margin-top:90px">
-  <h2 class="visually-hidden" id="process-title">The method</h2>
+  <h2 class="visually-hidden" id="process-title">Methodology</h2>
   <div class="process">
     <aside class="process-aside" aria-label="Method steps">
       <div class="big-num-wrap" aria-hidden="true"><span class="big-num" data-bignum>01</span><span class="big-of">/ ${pad2(steps.length)}</span></div>
@@ -497,7 +497,7 @@
 </section>
 
 <section class="wrap section" id="notes" aria-labelledby="notes-title" style="scroll-margin-top:90px">
-  <div class="section-head"><div><p class="kicker dash">Research notes</p><h2 class="display section-title" id="notes-title">Notes from the work.</h2></div>
+  <div class="section-head"><div><p class="kicker dash">Findings</p><h2 class="display section-title" id="notes-title">Findings from the work.</h2></div>
     <p class="section-lede">Short essays on single ideas from my projects, written for readers outside the field.</p></div>
   <div class="note-cards">${SITE.notes.map(noteCard).join("")}</div>
 </section>
@@ -511,8 +511,8 @@
     return `
 <article data-article>
   <header class="wrap note-hero">
-    <a class="back-link" href="#thinking"><span aria-hidden="true">←</span> Thinking</a>
-    <p class="kicker dash">Note ${pad2(i + 1)} · ${readMins(n)} min read</p>
+    <a class="back-link" href="#thinking"><span aria-hidden="true">←</span> Methodology</a>
+    <p class="kicker dash">Finding ${pad2(i + 1)} · ${readMins(n)} min read</p>
     <h1 class="display note-title lines" tabindex="-1">${lines(n.titleLines || [n.title])}</h1>
     <p class="note-dek">${n.dek}</p>
     <ul class="tag-row" aria-label="Topics">${n.tags.map(t => `<li>${t}</li>`).join("")}</ul>

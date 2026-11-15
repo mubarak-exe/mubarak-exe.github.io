@@ -202,7 +202,7 @@
             ] },
             { t: "links", items: [
               { kicker: "Paper · IEEE Xplore", title: "Text2Simulation: A Natural Language Interface for Transportation Digital Twin Systems" },
-              { kicker: "Note", title: "Teaching an LLM agent to say no", text: "Why the verifier matters more than the parser.", view: "note-say-no" }
+              { kicker: "Finding", title: "Teaching an LLM agent to say no", text: "Why the verifier matters more than the parser.", view: "note-say-no" }
             ] }
           ]
         }
@@ -412,7 +412,7 @@
           blocks: [
             { t: "p", text: "I also catalogued 31 public emotion datasets used in dementia studies, so it is easier to see what data exists and where the gaps are." },
             { t: "links", items: [
-              { kicker: "Note", title: "What lab accuracy doesn't tell you", text: "Notes from the review.", view: "note-lab-vs-care" }
+              { kicker: "Finding", title: "What lab accuracy doesn't tell you", text: "Notes from the review.", view: "note-lab-vs-care" }
             ] }
           ]
         }
@@ -487,7 +487,7 @@
   ];
 
   /* ------------------------------------------------------------------ */
-  /* Thinking: the method                                                */
+  /* Methodology page (#thinking): the five rules                        */
   /* ------------------------------------------------------------------ */
   SITE.process = [
     {
@@ -509,7 +509,7 @@
       rule: "Real deployments start where data is thin. I test whether a method still works when a new place has only a handful of examples.",
       project: "LinkETA", value: "25 trips",
       proof: "per new city were enough for meta-learning to cut road-segment error by up to 14.2%.",
-      link: "note-25-trips", linkLabel: "Read the note"
+      link: "note-25-trips", linkLabel: "Read the finding"
     },
     {
       title: "Put the model inside a system",
@@ -528,7 +528,7 @@
   ];
 
   /* ------------------------------------------------------------------ */
-  /* Thinking: research notes                                            */
+  /* Methodology page (#thinking): findings                              */
   /* ------------------------------------------------------------------ */
   SITE.notes = [
     {

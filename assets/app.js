@@ -12,7 +12,7 @@
   const reduced = () => reduceMQ.matches;
   const canVT = () => typeof doc.startViewTransition === "function" && !reduced();
   const NAME = SITE.person.name;
-  const PAGES = { home: "Home", work: "Work", thinking: "Thinking", creative: "Creative", poems: "Poems", photography: "Photography", about: "About", contact: "Contact" };
+  const PAGES = { home: "Home", work: "Work", thinking: "Methodology", creative: "Creative", poems: "Poems", photography: "Photography", about: "About", contact: "Contact" };
   const PROJECTS = Object.fromEntries(SITE.projects.map(p => [p.id, p]));
   const NOTES = Object.fromEntries(SITE.notes.map(n => [n.id, n]));
   const POEMS = Object.fromEntries((SITE.poems || []).map(p => [p.id, p]));
@@ -481,7 +481,7 @@
   const ITEMS = [].concat(
     Object.keys(PAGES).map(k => ({ group: "Pages", label: PAGES[k], hint: "Page", go: k, kw: k })),
     SITE.projects.map(p => ({ group: "Projects", label: p.title, hint: `${p.type} · ${p.years}`, go: p.id, kw: [p.tagline, p.hook, p.tags.join(" ")].join(" ") })),
-    SITE.notes.map(n => ({ group: "Notes", label: n.title, hint: "Note", go: n.id, kw: n.tags.join(" ") + " " + n.dek })),
+    SITE.notes.map(n => ({ group: "Findings", label: n.title, hint: "Finding", go: n.id, kw: n.tags.join(" ") + " " + n.dek })),
     (SITE.poems || []).map(p => ({ group: "Poems", label: p.title, hint: "Poem", go: p.id, kw: "poem poetry writing " + p.stanzas[0] })),
     [
       { group: "Actions", label: "Switch light or dark mode", hint: "Theme", run: () => toggleTheme(), kw: "theme dark light mode colour color" },
