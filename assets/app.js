@@ -86,6 +86,7 @@
     safe(setupAppreciate);
     if (r.view === "photography") safe(setupViewer);
     if (r.view === "home") safe(() => { const card = main.querySelector('[data-map="hero"]'); if (card) instances.push(D.mountHeroMap(card)); });
+    if (r.view === "home" && SITE.learnMap) safe(() => { const shell = main.querySelector("[data-learn-hero]"); if (shell) instances.push(SITE.learnMap.mount(shell)); });
     main.querySelectorAll('[data-demo="route"]').forEach(el => safe(() => instances.push(D.mountRouteDemo(el))));
     main.querySelectorAll('[data-demo="dispatch"]').forEach(el => safe(() => instances.push(D.mountDispatch(el))));
     main.querySelectorAll('[data-demo="checker"]').forEach(el => safe(() => instances.push(D.mountChecker(el))));

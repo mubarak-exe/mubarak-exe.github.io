@@ -286,19 +286,313 @@
     }
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Real streets (home page): pick a city, drop a pickup and drop-off.  */
+  /* Minimal ETA, no model: each street's travel time is its length over  */
+  /* a typical speed for its road type, slowed by a simple time-of-day    */
+  /* traffic pattern; the route is the fastest path (Dijkstra, heap).     */
+  /* ------------------------------------------------------------------ */
+  // What the panel shows of each city: its centre and how many metres fit across the panel.
+  const CITY_VIEWS = {
+    sf: { name: "San Francisco", lon: -122.4105, lat: 37.7835, widthM: 2600 },   // Union Square, SoMa, Civic Center
+    porto: { name: "Porto", lon: -8.6150, lat: 41.1460, widthM: 3000 },          // Baixa, Ribeira and the Douro
+    chengdu: { name: "Chengdu", lon: 104.0657, lat: 30.6600, widthM: 4200 },     // around Tianfu Square
+    shanghai: { name: "Shanghai", lon: 121.4800, lat: 31.2300, widthM: 4200 },   // People's Square to the Bund
+    annarbor: { name: "Ann Arbor", lon: -83.7430, lat: 42.2790, widthM: 3200 },  // downtown and Central Campus
+    daegu: { name: "Daegu", lon: 128.5960, lat: 35.8690, widthM: 3600 }          // Jung-gu, the city centre
+  };
+  const cityLoads = {};
+  function loadCity(key) {   // street files load only when a city is first picked
+    const LM = SITE.learnMap, have = SITE.cityRoads && SITE.cityRoads[key];
+    if (have) return Promise.resolve(have);
+    if (key === "sf" && LM && LM.loadRoads) return LM.loadRoads();
+    if (!cityLoads[key]) {
+      cityLoads[key] = new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = `assets/roads-${key}.js`;
+        s.onload = () => (SITE.cityRoads && SITE.cityRoads[key] ? resolve(SITE.cityRoads[key]) : reject(new Error("no streets")));
+        s.onerror = () => { delete cityLoads[key]; reject(new Error("streets failed to load")); };
+        document.head.appendChild(s);
+      });
+    }
+    return cityLoads[key];
+  }
+  function heapPush(h, item) {
+    h.push(item);
+    let i = h.length - 1;
+    while (i > 0) { const p = (i - 1) >> 1; if (h[p][0] <= h[i][0]) break; [h[p], h[i]] = [h[i], h[p]]; i = p; }
+  }
+  function heapPop(h) {
+    const top = h[0], last = h.pop();
+    if (h.length) {
+      h[0] = last;
+      let i = 0;
+      for (;;) {
+        const l = 2 * i + 1, r = l + 1;
+        let m = i;
+        if (l < h.length && h[l][0] < h[m][0]) m = l;
+        if (r < h.length && h[r][0] < h[m][0]) m = r;
+        if (m === i) break;
+        [h[m], h[i]] = [h[i], h[m]]; i = m;
+      }
+    }
+    return top;
+  }
+  class CityNet extends CanvasDemo {
+    constructor(canvas, view, streets, data, opts) {
+      super(canvas);
+      this.view = view; this.streets = streets; this.data = data;
+      this.o = Object.assign({ autoClock: true, hour: 7.5, daySeconds: 60, onUpdate: null }, opts || {});
+      this.hour = this.o.hour;
+      this.t = 0; this.A = null; this.B = null; this.pickNext = "A"; this.hover = -1;
+      this.nodes = []; this.edges = []; this.adj = []; this.cars = []; this.route = []; this.routeSet = new Set();
+      this.lastRoute = 0; this.lastEmit = 0;
+      this.layer = document.createElement("canvas");   // the faint side streets, drawn once
+      this._down = e => this.onDown(e);
+      this._move = e => this.onMove(e);
+      this._leave = () => { this.hover = -1; this.canvas.style.cursor = ""; if (!this.running) this.draw(); };
+      canvas.addEventListener("pointerdown", this._down);
+      canvas.addEventListener("pointermove", this._move);
+      canvas.addEventListener("pointerleave", this._leave);
+    }
+    build() {
+      const W = this.W, H = this.H, d = this.data, r = seeded(7);
+      const [lonMin, latMin, lonMax, latMax] = d.bbox, lat0 = (latMin + latMax) / 2;
+      const mx = 111320 * Math.cos((lat0 * Math.PI) / 180), my = 110540;
+      const v = this.view, s = W / v.widthM;                          // px per metre
+      const x0 = (v.lon - lonMin) * mx - W / s / 2, y0 = (latMax - v.lat) * my - H / s / 2, pad = 30 / s;
+      const nodes = [], index = new Map(), edges = [], adj = [];
+      const node = p => {
+        const k = Math.round(p.x) + "," + Math.round(p.y);
+        if (!index.has(k)) { index.set(k, nodes.length); nodes.push({ x: (p.x - x0) * s, y: (p.y - y0) * s }); adj.push([]); }
+        return index.get(k);
+      };
+      for (const st of this.streets) {
+        if (!st.pts.some(p => p.x > x0 - pad && p.x < x0 + W / s + pad && p.y > y0 - pad && p.y < y0 + H / s + pad)) continue;
+        const a = node(st.pts[0]), b = node(st.pts[st.pts.length - 1]);
+        if (a === b) continue;
+        const pts = st.pts.map(p => ({ x: (p.x - x0) * s, y: (p.y - y0) * s })), cum = [0];
+        for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+        const len = cum[cum.length - 1];
+        edges.push({ a, b, pts, cum, len, metres: len / s, art: st.major, free: st.major ? 45 : 30,
+          sens: st.major ? 0.6 + r() * 0.4 : 0.2 + r() * 0.4, base: r() * 0.16 - 0.05, phase: r() * 6.283, rate: 0.25 + r() * 0.5, c: 0, speed: 30 });
+        adj[a].push(edges.length - 1); adj[b].push(edges.length - 1);
+      }
+      this.nodes = nodes; this.edges = edges; this.adj = adj;
+      this.inView = nodes.map(n => n.x > 8 && n.y > 8 && n.x < W - 8 && n.y < H - 8 && true);
+      this.drawLayer();
+      // Cars: a few dozen dots driving the streets in view.
+      const pool = edges.map((e, i) => (this.inView[e.a] || this.inView[e.b] ? i : -1)).filter(i => i >= 0);
+      const count = Math.max(14, Math.min(48, Math.round((W * H) / 6000)));
+      this.cars = [];
+      for (let k = 0; k < count && pool.length; k++) {
+        const ei = pool[Math.floor(r() * pool.length)];
+        this.cars.push({ ei, forward: r() < 0.5, s: r() * edges[ei].len });
+      }
+      // Default trip, bottom-left to top-right, like the old panel.
+      this.update(0);
+      const a = this.nodeNear(W * 0.1, H * 0.86, 1e9), b = this.nodeNear(W * 0.9, H * 0.14, 1e9);
+      this.A = a; this.B = b; this.pickNext = "A";
+      this.findRoute();
+      this.emit(true);
+    }
+    drawLayer() {
+      const dpr = Math.min(2, g.devicePixelRatio || 1), c = this.layer, x = c.getContext("2d"), p = this.pal;
+      c.width = Math.round(this.W * dpr); c.height = Math.round(this.H * dpr);
+      x.setTransform(dpr, 0, 0, dpr, 0, 0);
+      x.lineCap = "round"; x.lineJoin = "round";
+      x.strokeStyle = p.road; x.lineWidth = 1.1;
+      x.beginPath();
+      for (const e of this.edges) if (!e.art) this.trace(x, e);
+      x.stroke();
+    }
+    repaint() { this.pal = palette(); if (this.W) { this.drawLayer(); this.draw(1); } }
+    setCity(view, streets, data) {
+      this.view = view; this.streets = streets; this.data = data; this.hover = -1;
+      if (this.W) { this.build(); this.draw(); }
+    }
+    update(dt) {
+      if (this.o.autoClock && dt > 0) this.hour = (this.hour + (dt * 24) / this.o.daySeconds) % 24;
+      const f = rush(this.hour);
+      for (const e of this.edges) {
+        const v = e.base + e.sens * f + 0.06 * Math.sin(this.t * e.rate + e.phase);
+        e.c = v < 0 ? 0 : v > 1 ? 1 : v;
+        e.speed = e.free * (1 - 0.75 * e.c);                      // km/h
+      }
+    }
+    minutes(e) { return (e.metres / 1000 / e.speed) * 60; }
+    findRoute() {
+      this.route = []; this.routeSet = new Set();
+      if (this.A == null || this.B == null || this.A === this.B) return;
+      const n = this.nodes.length, dist = new Float64Array(n).fill(Infinity), prev = new Int32Array(n).fill(-1), heap = [[0, this.A]];
+      dist[this.A] = 0;
+      while (heap.length) {
+        const [du, u] = heapPop(heap);
+        if (du > dist[u]) continue;
+        if (u === this.B) break;
+        for (const ei of this.adj[u]) {
+          const e = this.edges[ei], v = e.a === u ? e.b : e.a, w = du + this.minutes(e);
+          if (w < dist[v]) { dist[v] = w; prev[v] = ei; heapPush(heap, [w, v]); }
+        }
+      }
+      if (dist[this.B] === Infinity) return;
+      for (let cur = this.B; cur !== this.A;) { const ei = prev[cur]; this.route.push(ei); const e = this.edges[ei]; cur = e.a === cur ? e.b : e.a; }
+      this.route.reverse();
+      this.routeSet = new Set(this.route);
+    }
+    emit(force) {
+      if (!this.o.onUpdate) return;
+      const now = performance.now();
+      if (!force && now - this.lastEmit < 250) return;
+      this.lastEmit = now;
+      const segs = this.route.map(ei => ({ min: this.minutes(this.edges[ei]), c: this.edges[ei].c }));
+      this.o.onUpdate({ hour: this.hour, eta: segs.reduce((t, x) => t + x.min, 0), segs, hasRoute: segs.length > 0, pickNext: this.pickNext });
+    }
+    local(ev) { const r = this.canvas.getBoundingClientRect(); return [ev.clientX - r.left, ev.clientY - r.top]; }
+    nodeNear(x, y, maxD2) {   // nearest intersection on screen that has a street
+      let best = -1, bd = maxD2;
+      this.nodes.forEach((n, i) => {
+        if (!this.inView[i] || !this.adj[i].length) return;
+        const d = (n.x - x) ** 2 + (n.y - y) ** 2;
+        if (d < bd) { bd = d; best = i; }
+      });
+      return best;
+    }
+    onDown(ev) {
+      const [x, y] = this.local(ev), i = this.nodeNear(x, y, 40 * 40);
+      if (i < 0) return;
+      if (this.pickNext === "A") { this.A = i; this.B = null; this.pickNext = "B"; }
+      else { if (i === this.A) return; this.B = i; this.pickNext = "A"; }
+      this.findRoute(); this.draw(); this.emit(true);
+    }
+    onMove(ev) {
+      const [x, y] = this.local(ev), i = this.nodeNear(x, y, 40 * 40);
+      if (i !== this.hover) { this.hover = i; this.canvas.style.cursor = i >= 0 ? "pointer" : ""; if (!this.running) this.draw(); }
+    }
+    pointAt(e, s) {
+      let i = 1;
+      while (i < e.cum.length - 1 && e.cum[i] < s) i++;
+      const t = Math.max(0, Math.min(1, (s - e.cum[i - 1]) / ((e.cum[i] - e.cum[i - 1]) || 1))), a = e.pts[i - 1], b = e.pts[i];
+      return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+    }
+    step(dt, now) {
+      this.t += dt;
+      this.update(dt);
+      for (const car of this.cars) {
+        const e = this.edges[car.ei];
+        car.s += e.speed * 0.5 * dt;                              // time-lapse: 45 km/h is about 22 px/s
+        if (car.s < e.len) continue;
+        const end = car.forward ? e.b : e.a;
+        const opts = this.adj[end].filter(i => i !== car.ei && (this.inView[this.edges[i].a] || this.inView[this.edges[i].b]));
+        const ni = opts.length ? opts[(Math.random() * opts.length) | 0] : car.ei;
+        car.s = 0; car.forward = this.edges[ni].a === end; car.ei = ni;
+      }
+      if (now - this.lastRoute > 1200) { this.findRoute(); this.lastRoute = now; }
+      this.draw();
+      this.emit(false);
+    }
+    trace(ctx, e) { ctx.moveTo(e.pts[0].x, e.pts[0].y); for (let i = 1; i < e.pts.length; i++) ctx.lineTo(e.pts[i].x, e.pts[i].y); }
+    pin(i, label) {
+      const p = this.nodes[i], ctx = this.ctx;
+      ctx.fillStyle = this.pal.accent;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 11, 0, 6.283); ctx.fill();
+      ctx.fillStyle = this.pal.band;
+      ctx.font = "800 11px Archivo, Arial, sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(label, p.x, p.y + 0.5);
+    }
+    draw() {
+      const ctx = this.ctx, p = this.pal;
+      if (!this.W) return;
+      ctx.clearRect(0, 0, this.W, this.H);
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.drawImage(this.layer, 0, 0, this.W, this.H);
+      // Main roads, coloured by traffic, kept thin and see-through so the map stays light and the route stands out.
+      ctx.lineWidth = 1.3; ctx.globalAlpha = this.routeSet.size ? 0.42 : 0.6;
+      for (const e of this.edges) {
+        if (!e.art) continue;
+        ctx.strokeStyle = ramp(p, e.c);
+        ctx.beginPath(); this.trace(ctx, e); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      // The fastest route: a light casing, then each street in its traffic colour.
+      if (this.route.length) {
+        ctx.strokeStyle = p.ink; ctx.lineWidth = 6.5;
+        ctx.beginPath(); this.route.forEach(ei => this.trace(ctx, this.edges[ei])); ctx.stroke();
+        ctx.lineWidth = 3.5;
+        for (const ei of this.route) { const e = this.edges[ei]; ctx.strokeStyle = ramp(p, e.c); ctx.beginPath(); this.trace(ctx, e); ctx.stroke(); }
+      }
+      ctx.fillStyle = p.ink; ctx.globalAlpha = 0.85;
+      for (const car of this.cars) {
+        const e = this.edges[car.ei], q = this.pointAt(e, car.forward ? car.s : e.len - car.s);
+        ctx.beginPath(); ctx.arc(q.x, q.y, 1.9, 0, 6.283); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if (this.hover >= 0) {
+        const n = this.nodes[this.hover];
+        ctx.strokeStyle = p.accent; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(n.x, n.y, 9, 0, 6.283); ctx.stroke();
+      }
+      if (this.A != null) this.pin(this.A, "A");
+      if (this.B != null) this.pin(this.B, "B");
+    }
+    destroy() {
+      super.destroy();
+      this.canvas.removeEventListener("pointerdown", this._down);
+      this.canvas.removeEventListener("pointermove", this._move);
+      this.canvas.removeEventListener("pointerleave", this._leave);
+    }
+  }
+
   function etaText(s) { return s.hasRoute ? s.eta.toFixed(1) + " min" : s.pickNext === "B" ? "Pick B" : "–"; }
 
+  // Home page panel: real streets of the picked city when the street files load (and the new home visuals
+  // are switched on), otherwise the synthetic network.
   D.mountHeroMap = function (card) {
-    const q = k => card.querySelector(`[data-rn="${k}"]`);
-    const net = new RoadNet(card.querySelector("canvas"), {
+    const q = k => card.querySelector(`[data-rn="${k}"]`), canvas = card.querySelector("canvas");
+    const hint = card.querySelector(".map-hint"), picker = card.querySelector(".map-cities");
+    const opts = {
       seed: 21, autoClock: true, hour: 7.5, daySeconds: 60,
       onUpdate: s => {
         q("clock").textContent = clock(s.hour);
         q("eta").textContent = etaText(s);
         q("links").textContent = s.hasRoute ? String(s.segs.length) : "–";
       }
-    });
-    return net;
+    };
+    const LM = SITE.learnMap;
+    let inst = null, dead = false, city = "sf", token = 0;
+    const synthetic = () => { if (!dead && !inst) inst = new RoadNet(canvas, opts); };
+    function describe(view) {
+      canvas.setAttribute("aria-label", `Map of central ${view.name} with live traffic colours. Click to drop a pickup point, then a drop-off point, to see the fastest route and its travel time.`);
+      if (hint) hint.innerHTML = `Pick a city, then click the map to drop a pickup (A) and a drop-off (B). The clock runs through a full day, so rush hour slows the main roads. ETAs use typical speeds by road type, for illustration. Streets of ${view.name}, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.`;
+    }
+    function press(key) { picker.querySelectorAll("[data-city]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.city === key))); }
+    function pick(key) {
+      if (!inst || !CITY_VIEWS[key] || key === city) return;
+      const mine = ++token, prev = city;
+      city = key; press(key);
+      q("eta").textContent = "Loading…";
+      loadCity(key).then(data => {
+        if (dead || mine !== token) return;
+        inst.setCity(CITY_VIEWS[key], LM.decode(data), data);
+        describe(CITY_VIEWS[key]);
+      }, () => {
+        if (dead || mine !== token) return;
+        city = prev; press(prev);
+        q("eta").textContent = "Couldn't load";
+      });
+    }
+    const onPick = e => { const b = e.target.closest("[data-city]"); if (b) pick(b.dataset.city); };
+    if (LM && LM.enabled && LM.loadRoads) {
+      loadCity("sf").then(data => {
+        if (dead) return;
+        inst = new CityNet(canvas, CITY_VIEWS.sf, LM.decode(data), data, opts);
+        card.classList.add("is-real");
+        describe(CITY_VIEWS.sf);
+        if (picker) picker.addEventListener("click", onPick);
+      }, synthetic);
+    } else synthetic();
+    return { destroy() { dead = true; if (picker) picker.removeEventListener("click", onPick); if (inst) inst.destroy(); } };
   };
 
   D.mountRouteDemo = function (root) {

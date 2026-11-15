@@ -7,7 +7,6 @@
   --ink: #0A1828;
   --muted: #4A5868;
   --line: #D6DDE4;
-  --dot: #D0D8E0;
   --accent: #A04A08;
   --accent-ink: #FFFFFF;
   --band: #0A1828;
@@ -31,7 +30,7 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0A1828; --surface: #112236; --surface-2: #0E1D30; --ink: #E8EEF4; --muted: #9AAABB; --line: #1F3349; --dot: #14273B;
+    --bg: #0A1828; --surface: #112236; --surface-2: #0E1D30; --ink: #E8EEF4; --muted: #9AAABB; --line: #1F3349;
     --accent: #F5A524; --accent-ink: #0A1828;
     --band: #0F2034; --band-deep: #081422; --band-ink: #E8EEF4; --band-muted: #9AAABB; --band-line: #22384F; --band-accent: #F5A524;
     --map-free: #3CCB8F; --map-slow: #F5A524; --map-jam: #FF6B5B;
@@ -40,7 +39,7 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0A1828; --surface: #112236; --surface-2: #0E1D30; --ink: #E8EEF4; --muted: #9AAABB; --line: #1F3349; --dot: #14273B;
+  --bg: #0A1828; --surface: #112236; --surface-2: #0E1D30; --ink: #E8EEF4; --muted: #9AAABB; --line: #1F3349;
   --accent: #F5A524; --accent-ink: #0A1828;
   --band: #0F2034; --band-deep: #081422; --band-ink: #E8EEF4; --band-muted: #9AAABB; --band-line: #22384F; --band-accent: #F5A524;
   --map-free: #3CCB8F; --map-slow: #F5A524; --map-jam: #FF6B5B;
@@ -56,8 +55,6 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   background-color: var(--bg);
-  background-image: radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 1.4px);
-  background-size: 26px 26px;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 17px;
@@ -247,6 +244,10 @@ kbd {
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--map-free); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 .legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; color: var(--band-muted); }
 .legend li { display: inline-flex; align-items: center; gap: 6px; }
+/* City picker: only shown once the panel is running on real streets (demos.js adds .is-real). */
+.map-cities { display: none; flex-wrap: wrap; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--band-line); }
+.map-card.is-real .map-cities { display: flex; }
+.map-cities .chip-btn { min-height: 32px; padding: 0 12px; font-size: 0.8rem; }
 .sw { width: 16px; height: 4px; border-radius: 2px; display: inline-block; }
 .sw-free { background: var(--map-free); } .sw-slow { background: var(--map-slow); } .sw-jam { background: var(--map-jam); }
 .map-canvas { position: relative; width: 100%; aspect-ratio: 16 / 11; max-width: 100%; }
@@ -662,7 +663,6 @@ a.contact-card:hover .arr { transform: translate(3px, -3px); }
 .reasons { padding-bottom: clamp(80px, 10vw, 140px); }
 
 /* ---------- Poems and Photography (calm pages) ---------- */
-body:has(#view[data-view="poems"]), body:has(#view[data-view="poem"]), body:has(#view[data-view="photography"]) { background-image: none; }
 body:has(dialog.viewer[open]) { overflow: hidden; }
 .serif-title { font-family: var(--serif); font-weight: 400; font-size: clamp(2.75rem, 7vw, 5rem); line-height: 1.02; letter-spacing: -0.02em; }
 .calm-hero { gap: 20px; padding-block: clamp(48px, 8vw, 112px) clamp(40px, 6vw, 80px); }
@@ -866,3 +866,25 @@ main.fade-in { animation: vt-in 0.5s var(--ease) both; }
 .cv-token { fill: var(--band-deep); stroke: var(--band-line); }
 .cv-token-hi { fill: var(--band-deep); stroke: var(--band-accent); }
 .cv-token-t { fill: var(--band-ink); font-family: var(--mono); font-size: 16px; }
+
+/* ---------- "The map learns itself" (home hero animation, see learn-map.js) ---------- */
+.hero-shell { position: relative; isolation: isolate; }
+.hero-shell .hero { position: relative; }
+.learn-field {
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent); mask-image: linear-gradient(to bottom, #000 72%, transparent);
+}
+/* Caption naming the current step; lines up with the kicker on wide screens only. */
+.learn-steps {
+  position: absolute; top: clamp(40px, 7vw, 100px); right: max(var(--gutter), env(safe-area-inset-right, 0px)); margin: 0;
+  display: none; align-items: center; gap: 0.6em;
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+}
+@media (min-width: 1000px) { .hero-shell.is-learning .learn-steps { display: inline-flex; } }
+.learn-steps i { font-style: normal; opacity: 0.5; }
+.learn-steps span { opacity: 0.6; transition: color 0.6s ease, opacity 0.6s ease; }
+.learn-steps span.on { color: var(--accent); opacity: 1; }
+/* OpenStreetMap credit for the background streets; only shown while the animation runs. */
+.learn-credit { margin: -8px 0 0; font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.04em; color: var(--muted); }
+.learn-credit a { color: inherit; }
+.hero-shell:not(.is-learning) .learn-credit { display: none; }

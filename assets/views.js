@@ -344,8 +344,10 @@
     const featured = SITE.projects.filter(p => p.featured);
     const toolkit = SITE.toolkit.map(t => `<span>${t}</span>`).join("");
     return `
+<div class="hero-shell" data-learn-hero><canvas class="learn-field" aria-hidden="true"></canvas>
 <section class="wrap hero" aria-labelledby="hero-title">
   <p class="kicker dash">Machine learning · Urban mobility · Research</p>
+  <p class="learn-steps" aria-hidden="true"><span data-learn-step>GPS pings</span><i>→</i><span data-learn-step>Roads</span><i>→</i><span data-learn-step>Travel times</span></p>
   <h1 class="display hero-title lines" id="hero-title" tabindex="-1">${lines(["Predicting how", "cities move,", "<em>one road</em>", "at a time."])}</h1>
   <div class="hero-grid">
     <div class="hero-intro">
@@ -356,10 +358,12 @@
         <div><dt>Before</dt><dd>IT Consultant, Glazingshopee, Mumbai</dd></div>
       </dl>
       <div class="actions"><a class="btn btn-primary" href="#work">See the work ${ARR}</a><a class="btn" href="#thinking">How I think ${ARR}</a></div>
+      <p class="learn-credit">Background: streets of San Francisco, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
     </div>
     <figure class="map-card" data-map="hero">
       <div class="map-head"><span class="map-live"><span class="live-dot"></span>Live demo network</span>
         <ul class="legend" aria-label="Legend"><li><i class="sw sw-free"></i>Free flow</li><li><i class="sw sw-slow"></i>Slow</li><li><i class="sw sw-jam"></i>Congested</li></ul></div>
+      <div class="map-cities" role="group" aria-label="Choose a city">${[["sf", "San Francisco"], ["porto", "Porto"], ["chengdu", "Chengdu"], ["shanghai", "Shanghai"], ["annarbor", "Ann Arbor"], ["daegu", "Daegu"]].map(([k, n], i) => `<button class="chip-btn" type="button" data-city="${k}" aria-pressed="${i === 0}">${n}</button>`).join("")}</div>
       <div class="map-canvas"><canvas role="img" aria-label="Animated road network. Roads change color with traffic through the day, and the fastest route from A to B is highlighted. Click two intersections to set a new trip."></canvas></div>
       <div class="map-foot">
         <div><span class="mf-label">Clock</span><span class="mf-value" data-rn="clock">07:30</span></div>
@@ -370,6 +374,7 @@
     </figure>
   </div>
 </section>
+</div>
 
 <section class="band stats-band" aria-label="Highlights">
   <div class="wrap stats-grid">${SITE.stats.map(s => `<a class="stat rv" href="#${s.view}"><span class="stat-value" data-count>${s.value}</span><span class="stat-label">${s.label}</span></a>`).join("")}</div>
