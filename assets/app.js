@@ -93,6 +93,7 @@
     if (r.view === "work") safe(setupFilters);
     if (r.view === "thinking") safe(setupProcess);
     if (r.view === "about") safe(setupTimeline);
+    if (r.view === "about") safe(setupContactForm);
   }
 
   /* ---------------- Scroll reveals & counters ---------------- */
@@ -298,6 +299,46 @@
       if (btn) btn.addEventListener("click", run);
       if (hide) hide.addEventListener("click", () => { stop(); finish(); open(false); if (btn) btn.focus(); });
       cleanups.push(stop);
+    });
+  }
+
+  /* ---------------- About: compact contact form ----------------
+     With a Formspree form ID (SITE.person.formspree) the message is posted there and arrives by email.
+     Without one, the visitor's email app opens with the message filled in. */
+  function setupContactForm() {
+    const form = main.querySelector("[data-contact-form]");
+    if (!form) return;
+    const P = SITE.person, status = form.querySelector(".tf-status"), btn = form.querySelector("button[type=submit]");
+    const say = (msg, ok) => { status.textContent = msg; status.classList.toggle("ok", !!ok); status.classList.toggle("err", ok === false); };
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+      const d = new FormData(form);
+      if (String(d.get("_gotcha") || "")) return;   // spam trap filled in by a bot
+      const name = String(d.get("name") || "").trim(), email = String(d.get("email") || "").trim(), msg = String(d.get("message") || "").trim();
+      if (!name || !msg || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        say("Please add your name, a valid email and a message.", false);
+        const f = form.elements;
+        (!name ? f.namedItem("name") : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? f.namedItem("email") : f.namedItem("message")).focus();
+        return;
+      }
+      if (!P.formspree) {
+        const subject = `Message from ${name} via mubarak.sh`, body = `${msg}\n\n${name}\n${email}`;
+        g.location.href = `mailto:${P.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        say("Your email app should open with the message ready to send.", true);
+        return;
+      }
+      btn.disabled = true;
+      say("Sending…");
+      try {
+        const res = await fetch(`https://formspree.io/f/${encodeURIComponent(P.formspree)}`, { method: "POST", body: d, headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        say("Thanks, your message was sent. I'll reply by email.", true);
+      } catch (err) {
+        say(`Sorry, it didn't send. Please email me at ${P.email}.`, false);
+      } finally {
+        btn.disabled = false;
+      }
     });
   }
 

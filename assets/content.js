@@ -12,8 +12,12 @@
     github: "https://github.com/mubarak-exe",
     githubLabel: "github.com/mubarak-exe",
     location: "Waterloo, Ontario, Canada",
-    coords: "43.46° N, 80.52° W",
-    status: "Looking for machine learning and research roles in Canada."
+    coords: "43.4647° N, 80.5222° W · Uptown Waterloo",
+    status: "Looking for machine learning and research roles in Canada.",
+    // Website copy of the resume (title "Machine Learning Researcher", no phone number); built from resume.tex.
+    resume: "assets/Mubarak_Shikalgar_Resume.pdf",
+    // Formspree form ID for the About contact box (the part after formspree.io/f/). Empty = the form opens the visitor's email app.
+    formspree: ""
   };
 
   SITE.stats = [
@@ -670,11 +674,11 @@
     { when: "Jan 2025 – Apr 2026", type: "Teaching", role: "Graduate Teaching Assistant", org: "Wilfrid Laurier University, Waterloo",
       text: "CP421 Data Mining (MapReduce, clustering, recommender systems) and CP476 Internet Computing (web development). Managed student groups, graded assignments, projects and presentations, and proctored exams." },
     { when: "Sep 2024 – Apr 2026", type: "Education", role: "Master of Applied Computing", org: "Wilfrid Laurier University, Waterloo",
-      text: "GPA 10.75/12. Award for Outstanding Graduate Work, Class of 2026. Thesis: <a href=\"https://scholars.wlu.ca/etd/2908/\" target=\"_blank\" rel=\"noopener\">Intelligent Digital Twin System for Urban Mobility</a>." },
+      facts: ["GPA 10.75/12", "Award for Outstanding Graduate Work, Class of 2026", "Thesis: <a href=\"https://scholars.wlu.ca/etd/2908/\" target=\"_blank\" rel=\"noopener\">Intelligent Digital Twin System for Urban Mobility</a>"] },
     { when: "Jun 2022 – Jun 2024", type: "Work", role: "IT Consultant", org: "Glazingshopee, Mumbai",
       text: "Led product development for FacadeMart, Buyglass24 and EdFacade, and coordinated a 5-person cross-functional team. <a href=\"#glazingshopee\">Read the case study</a>." },
     { when: "Jul 2018 – May 2022", type: "Education", role: "B.Tech. in Computer Science and Engineering", org: "Sanjay Ghodawat University, Kolhapur",
-      text: "GPA 8.29/10. SGU Best Project Award (2021–22) for <a href=\"#fake-news\">fake news detection</a>." }
+      facts: ["GPA 8.29/10", "SGU Best Project Award (2021–22) for <a href=\"#fake-news\">fake news detection</a>"] }
   ];
 
   SITE.awards = [

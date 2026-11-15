@@ -658,14 +658,17 @@
       <div><dt>Focus</dt><dd>Travel-time estimation, digital twins, LLM agents</dd></div>
       <div><dt>Open to</dt><dd>Machine learning and research roles in Canada</dd></div>
     </dl>
-    <a class="btn btn-amber" href="#contact">Get in touch ${ARR}</a>
+    <div class="card-actions">
+      <button class="btn btn-amber" type="button" data-goto="get-in-touch">Get in touch ${DOWN}</button>
+      <a class="btn btn-ghost-band" href="${esc(P.resume)}" target="_blank" rel="noopener">Resume (PDF) ${EXT}</a>
+    </div>
   </aside>
 </section>
 
 <section class="wrap about-block" aria-labelledby="path-title">
   <div class="section-head"><div><p class="kicker dash">Path</p><h2 class="display section-title" id="path-title">Experience and education.</h2></div></div>
   <div class="timeline-wrap"><span class="timeline-progress" aria-hidden="true"></span>
-    <ol class="timeline">${SITE.timeline.map(t => `<li class="tl-item"><span class="tl-when">${t.when}</span><div class="tl-main"><p class="tl-type">${t.type}</p><h3 class="tl-role">${t.role}</h3><p class="tl-org">${t.org}</p><p>${t.text}</p></div></li>`).join("")}</ol>
+    <ol class="timeline">${SITE.timeline.map(t => `<li class="tl-item"><span class="tl-when">${t.when}</span><div class="tl-main"><p class="tl-type">${t.type}</p><h3 class="tl-role">${t.role}</h3><p class="tl-org">${t.org}</p>${t.facts ? `<ul class="tl-facts">${t.facts.map(f => `<li>${f}</li>`).join("")}</ul>` : `<p>${t.text}</p>`}</div></li>`).join("")}</ol>
   </div>
 </section>
 
@@ -682,6 +685,26 @@
 <section class="wrap about-block" aria-labelledby="skills-title">
   <div class="section-head"><div><p class="kicker dash">Capabilities</p><h2 class="display section-title" id="skills-title">Toolkit.</h2></div></div>
   <div class="skills">${SITE.skills.map(s => `<div class="skill-group rv"><h3>${s.group}</h3><ul class="chips">${s.items.map(x => `<li>${x}</li>`).join("")}</ul></div>`).join("")}</div>
+</section>
+
+<section class="wrap about-block" id="get-in-touch" aria-labelledby="touch-title">
+  <div class="touch">
+    <div class="touch-intro">
+      <p class="kicker dash">Get in touch</p>
+      <h2 class="touch-title" id="touch-title">Send me a message.</h2>
+      <p class="touch-text">Questions about my research, a role or a collaboration? Write here and it comes straight to my inbox.</p>
+      <p class="touch-links"><a href="mailto:${esc(P.email)}">${esc(P.email)}</a><a href="${esc(P.linkedin)}" target="_blank" rel="noopener">LinkedIn ${EXT}</a><a href="${esc(P.resume)}" target="_blank" rel="noopener">Resume (PDF) ${EXT}</a></p>
+    </div>
+    <form class="touch-form" data-contact-form novalidate>
+      <div class="tf-row">
+        <label class="tf-field"><span>Name</span><input name="name" type="text" autocomplete="name" required maxlength="120"></label>
+        <label class="tf-field"><span>Email</span><input name="email" type="email" autocomplete="email" required maxlength="160"></label>
+      </div>
+      <label class="tf-field"><span>Message</span><textarea name="message" rows="4" required maxlength="4000"></textarea></label>
+      <input class="tf-trap" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="tf-foot"><button class="btn btn-primary" type="submit">Send ${ARR}</button><p class="tf-status" role="status" aria-live="polite"></p></div>
+    </form>
+  </div>
 </section>`;
   };
 

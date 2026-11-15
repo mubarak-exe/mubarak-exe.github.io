@@ -870,6 +870,34 @@ a.link-card:hover .link-card-arr { transform: translate(3px, -3px); }
 .band-card dt { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--band-muted); }
 .band-card .mono-sm { color: var(--band-muted); }
 .band-card .btn { justify-self: start; }
+.card-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* About: compact "Get in touch" box (text and links left, form right; stacked on phones) */
+.touch { display: grid; gap: 20px 40px; padding: clamp(20px, 3vw, 28px); border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+@media (min-width: 880px) { .touch { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); align-items: start; } }
+.touch-intro { display: grid; gap: 10px; align-content: start; }
+.touch-title { font-family: var(--display); font-weight: 600; font-stretch: 100%; font-size: clamp(1.4rem, 2.2vw, 1.75rem); line-height: 1.2; letter-spacing: -0.01em; }
+.touch-text { color: var(--muted); line-height: 1.6; max-width: 32em; }
+.touch-links { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.92rem; }
+.touch-links a { color: var(--accent); font-weight: 600; text-decoration: none; display: inline-flex; gap: 6px; }
+.touch-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.touch-form { display: grid; gap: 12px; }
+.tf-row { display: grid; gap: 12px; }
+@media (min-width: 560px) { .tf-row { grid-template-columns: 1fr 1fr; } }
+.tf-field { display: grid; gap: 5px; }
+.tf-field span { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.tf-field input, .tf-field textarea {
+  font: inherit; font-size: 0.98rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; width: 100%; box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.tf-field textarea { resize: vertical; min-height: 104px; line-height: 1.5; }
+.tf-field input:focus, .tf-field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+.tf-trap { position: absolute !important; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.tf-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.tf-foot .btn[disabled] { opacity: 0.6; cursor: wait; }
+.tf-status { font-size: 0.9rem; color: var(--muted); }
+.tf-status.ok { color: var(--ink); }
+.tf-status.err { color: var(--accent); }
 
 .timeline-wrap { position: relative; padding-left: 34px; }
 .timeline-wrap::before { content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
@@ -887,6 +915,10 @@ a.link-card:hover .link-card-arr { transform: translate(3px, -3px); }
 .tl-type { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
 .tl-role { font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 800; font-stretch: 108%; letter-spacing: -0.02em; }
 .tl-org { color: var(--muted); }
+/* Education details on separate lines, split by thin rules */
+.tl-facts { list-style: none; margin: 4px 0 0; padding: 0; display: grid; max-width: 34rem; }
+.tl-facts li { padding: 7px 0; border-top: 1px solid var(--line); line-height: 1.5; }
+.tl-facts li:first-child { border-top: 0; padding-top: 2px; }
 .awards { display: grid; border-top: 1px solid var(--ink); }
 .award { display: grid; gap: 6px 32px; padding-block: 22px; border-bottom: 1px solid var(--line); align-items: baseline; }
 @media (min-width: 760px) { .award { grid-template-columns: 12rem minmax(0, 1fr); } }
