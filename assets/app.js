@@ -549,6 +549,13 @@
     if (e.key === "Escape" && !menu.hidden) { closeMenu(); menuBtn.focus(); }
   });
 
+  /* ---------------- Photo protection ----------------
+     Deterrents only (a browser has to download an image to show it, so nothing can make saving
+     impossible): no right-click / long-press "Save image" menu and no dragging photos out of the page. */
+  const onPhoto = e => e.target.closest && e.target.closest(".ph-frame, .viewer-frame");
+  doc.addEventListener("contextmenu", e => { if (onPhoto(e)) { e.preventDefault(); toast("Photos © Mubarak Shikalgar"); } });
+  doc.addEventListener("dragstart", e => { if (onPhoto(e)) e.preventDefault(); });
+
   /* ---------------- Global clicks ---------------- */
   doc.addEventListener("click", e => {
     const c = e.target.closest("[data-copy]");
