@@ -1,24 +1,26 @@
 /* Layout: 1280px editorial grid. Type-led heroes in expanded Archivo; navy "night map" bands carry data, demos and the footer;
    case studies and notes pair a sticky section index with a reading column. Palette: Navy + Amber (approved). */
+/* Day: "Mist" (soft blue-grey, no pure white). Night: navy #08121E. Text contrast matches in both (about 15.7:1);
+   every text colour passes WCAG AA. The navy is the same in both modes: night background, day text and day bands. */
 :root {
-  --bg: #F4F6F8;
-  --surface: #FFFFFF;
-  --surface-2: #E9EEF2;
-  --ink: #0A1828;
-  --muted: #4A5868;
-  --line: #D6DDE4;
-  --accent: #A04A08;
+  --bg: #E7EBEF;
+  --surface: #F0F3F6;
+  --surface-2: #DEE4EA;
+  --ink: #08121E;
+  --muted: #4C5A68;
+  --line: #CED7E0;
+  --accent: #9A4708;
   --accent-ink: #FFFFFF;
-  --band: #0A1828;
-  --band-deep: #06101C;
-  --band-ink: #E8EEF4;
-  --band-muted: #9AAABB;
-  --band-line: #1F3349;
+  --band: #08121E;
+  --band-deep: #060F1A;
+  --band-ink: #E5ECF2;
+  --band-muted: #8B9EB1;
+  --band-line: #1A2B3C;
   --band-accent: #F5A524;
   --map-free: #3CCB8F;
   --map-slow: #F5A524;
   --map-jam: #FF6B5B;
-  --shadow: 0 24px 60px -24px rgba(10, 24, 40, 0.28);
+  --shadow: 0 24px 60px -24px rgba(8, 18, 30, 0.24);
   --display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
@@ -30,18 +32,18 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0A1828; --surface: #112236; --surface-2: #0E1D30; --ink: #E8EEF4; --muted: #9AAABB; --line: #1F3349;
-    --accent: #F5A524; --accent-ink: #0A1828;
-    --band: #0F2034; --band-deep: #081422; --band-ink: #E8EEF4; --band-muted: #9AAABB; --band-line: #22384F; --band-accent: #F5A524;
+    --bg: #08121E; --surface: #0D1A29; --surface-2: #0B1624; --ink: #E5ECF2; --muted: #8B9EB1; --line: #182737;
+    --accent: #F5A524; --accent-ink: #08121E;
+    --band: #0B1828; --band-deep: #060F1A; --band-ink: #E5ECF2; --band-muted: #8B9EB1; --band-line: #1A2B3C; --band-accent: #F5A524;
     --map-free: #3CCB8F; --map-slow: #F5A524; --map-jam: #FF6B5B;
     --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0A1828; --surface: #112236; --surface-2: #0E1D30; --ink: #E8EEF4; --muted: #9AAABB; --line: #1F3349;
-  --accent: #F5A524; --accent-ink: #0A1828;
-  --band: #0F2034; --band-deep: #081422; --band-ink: #E8EEF4; --band-muted: #9AAABB; --band-line: #22384F; --band-accent: #F5A524;
+  --bg: #08121E; --surface: #0D1A29; --surface-2: #0B1624; --ink: #E5ECF2; --muted: #8B9EB1; --line: #182737;
+  --accent: #F5A524; --accent-ink: #08121E;
+  --band: #0B1828; --band-deep: #060F1A; --band-ink: #E5ECF2; --band-muted: #8B9EB1; --band-line: #1A2B3C; --band-accent: #F5A524;
   --map-free: #3CCB8F; --map-slow: #F5A524; --map-jam: #FF6B5B;
   --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
