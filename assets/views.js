@@ -394,8 +394,8 @@
   <div class="think-grid">
     <div class="think-intro">
       <p class="kicker dash">Methodology</p>
-      <h2 class="display section-title" id="think-title">How I do research.</h2>
-      <p class="section-lede">Five rules I work by, each backed by a result from a real project. Then findings that go deeper.</p>
+      <h2 class="display section-title" id="think-title">How I do research and build ML pipelines.</h2>
+      <p class="section-lede">Nine stages I follow on every project, from the first question to production.</p>
       <a class="more-link" href="#thinking">Read the methodology ${ARR}</a>
     </div>
     <ol class="steps-mini">${SITE.process.map((s, k) => `<li><a href="#thinking" data-step-link="${k}"><span class="n">${pad2(k + 1)}</span><span class="t">${s.title}</span>${ARR}</a></li>`).join("")}</ol>
@@ -462,37 +462,148 @@
 </article>`;
   };
 
+  // Methodology visuals: two playable stories (data pipeline, service request) and a tappable dashboard.
+  // A story is a small map (SVG lines + HTML labels), a side panel, a one-line caption and the numbered stops.
+  // app.js adds classes s1, s2, ... to the figure as each stop is reached; site.css draws each state.
+  const PLAY_I = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.8 10.2 6 3 10.2z" fill="currentColor"/></svg>';
+  const VW = 360, VH = 170;
+  const at = (x, y) => `left:${(x / VW * 100).toFixed(2)}%;top:${(y / VH * 100).toFixed(2)}%`;
+  // Collapsed by default: the numbered stops only. Play opens the story panel and runs it; Hide folds it away.
+  const story = ({ cls, label, play, again, alt, map, side, steps }) => `<figure class="viz viz-story ${cls} rv" data-flow aria-label="${label}">
+      <figcaption class="viz-head"><span class="viz-title">${label}</span><span class="viz-tools"><span class="kpi-tag">Illustrative</span>
+        <button class="viz-hide" type="button" data-flow-hide hidden>Hide</button>
+        <button class="viz-play" type="button" data-flow-play data-again="${again}" aria-expanded="false">${PLAY_I}<span>${play}</span></button></span></figcaption>
+      <ol class="fl-line">${steps.map(([t, d, cap], i) => `<li class="fl-step" data-cap="${cap}"><span class="fl-dot" aria-hidden="true">${i + 1}</span><span class="fl-txt"><span class="fl-t">${t}</span><span class="fl-d">${d}</span></span></li>`).join("")}</ol>
+      <div class="viz-body"><div class="viz-body-in">
+        <p class="viz-cap" data-flow-cap>${steps[0][2]}</p>
+        <div class="viz-stage">
+          <div class="viz-mapcol"><div class="viz-map" role="img" aria-label="${alt}"><svg viewBox="0 0 ${VW} ${VH}" aria-hidden="true">${map.svg}</svg>${map.html}</div>${map.after || ""}</div>
+          <div class="viz-side" aria-hidden="true">${side}</div>
+        </div>
+      </div></div>
+    </figure>`;
+  const pipelineStory = () => {
+    // Seven road segments: x1, y1, x2, y2, travel-time class, label
+    const segs = [[10, 112, 120, 100, "free", "38 s"], [120, 100, 232, 116, "slow", "1 m 12 s"], [232, 116, 350, 92, "free", ""],
+      [120, 8, 120, 100, "jam", "2 m 05 s"], [120, 100, 108, 162, "free", ""], [232, 116, 262, 10, "slow", "54 s"], [232, 116, 300, 162, "free", ""]];
+    const rnd = seeded(11), dots = [];
+    segs.forEach(([x1, y1, x2, y2]) => { for (let j = 0; j < 5; j++) { const t = (j + 0.25 + rnd() * 0.5) / 5; dots.push([x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, (rnd() * 2 - 1) * 12, (rnd() * 2 - 1) * 12]); } });
+    const line = ([x1, y1, x2, y2], c) => `<line class="${c}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" pathLength="1"/>`;
+    const svg = `<g class="pv-roads">${segs.map(s => line(s, "pv-road")).join("")}</g>
+      <g class="pv-segs">${segs.map(s => line(s, "pv-seg pv-" + s[4])).join("")}</g>
+      <g class="pv-dots">${dots.map(([x, y, dx, dy], i) => `<circle class="pv-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.8" style="--dx:${dx.toFixed(1)}px;--dy:${dy.toFixed(1)}px;--d:${i % 12}"/>`).join("")}</g>`;
+    const html = segs.filter(s => s[5]).map(([x1, y1, x2, y2, , t], i) => `<span class="pv-time" style="${at((x1 + x2) / 2, (y1 + y2) / 2)};--i:${i}">${t}</span>`).join("");
+    const after = `<span class="pv-legend" aria-hidden="true"><i class="pv-free"></i>Fast<i class="pv-slow"></i>Slow<i class="pv-jam"></i>Congested</span>`;
+    const rows = [["Road 1042", "38 s", ""], ["Road 0871", "2 m 05 s", "Duplicate"], ["Road 2210", "1 m 12 s", ""], ["Road 0533", "41 s", "Future data (leak)"], ["Road 1777", "54 s", ""]];
+    const side = `<div class="pv-block"><span class="pv-k">Features per road</span>
+        <ul class="pv-chips">${["Road type", "Road length", "Recent traffic", "Hour of day", "Day of week", "Neighbouring roads"].map((c, i) => `<li style="--i:${i}">${c}</li>`).join("")}</ul></div>
+      <div class="pv-block"><div class="pv-k-row"><span class="pv-k">Dataset</span><span class="pv-badge">✓ Validated</span></div>
+        <div class="pv-rows">${rows.map(([id, v, why], i) => `<div class="pv-row${why ? " bad" : ""}" style="--i:${i}"><span>${id}</span><span class="pv-v">${v}</span>${why ? `<span class="pv-why">${why}</span>` : ""}<span class="pv-chk">${why ? "✕" : "✓"}</span></div>`).join("")}</div></div>`;
+    return story({ cls: "pv", label: "Data pipeline", play: "Run the pipeline", again: "Run again",
+      alt: "GPS pings snap onto roads, become travel times per road, gain features, and pass quality checks.",
+      map: { svg, html, after }, side, steps: [
+        ["Raw GPS", "Trips from six datasets", "Noisy GPS pings from taxis, cars and buses."],
+        ["Map matching", "Points snapped to real roads", "Each ping is matched to the road it was on."],
+        ['<span class="nw">Road-level</span> times', "Travel time for every road", "Pings on each road become one travel time."],
+        ["Features", "Road, traffic and time", "Every road gets its features: road, traffic and time."],
+        ["Validated dataset", "Leak and quality checks", "Duplicates and leaks are removed. The dataset is ready for training."]] });
+  };
+  const serviceStory = () => {
+    const streets = [40, 100, 160, 220, 280, 340].map(x => `<line x1="${x}" y1="0" x2="${x}" y2="${VH}"/>`).join("")
+      + [30, 75, 120, 160].map(y => `<line x1="0" y1="${y}" x2="${VW}" y2="${y}"/>`).join("");
+    const legs = [["walk", "M40 150 L92 140"], ["bus", "M92 140 L160 120 L222 80 L282 62"], ["walk", "M282 62 L322 28"]];
+    const svg = `<g class="sv-streets">${streets}</g>
+      ${legs.map(([m, d]) => `<path class="sv-leg sv-${m}" d="${d}"${m === "bus" ? ' pathLength="1"' : ""}/>`).join("")}
+      ${[[92, 140], [160, 120], [222, 80], [282, 62]].map(([x, y]) => `<circle class="sv-stop" cx="${x}" cy="${y}" r="4"/>`).join("")}
+      ${legs.map(([, d], k) => `<path class="sv-scan" d="${d}" pathLength="1" style="--k:${k}"/>`).join("")}`;
+    const html = `<span class="sv-pin" style="${at(40, 150)}">A</span><span class="sv-pin" style="${at(322, 28)}">B</span>
+      ${[[68, 142, "Walk 4 min", ""], [168, 92, "Bus 12 min", ""], [290, 36, "Walk 3 min", " left"]].map(([x, y, t, c], i) => `<span class="sv-time${c}" style="${at(x, y)};--i:${i}">${t}</span>`).join("")}`;
+    const side = `<div class="sv-code">
+        <div class="cl c1"><b>POST</b> /eta</div>
+        <div class="cl c1 dim">{ "from": "A", "to": "B", "depart": "08:30" }</div>
+        <div class="cl c2"><b>OpenTripPlanner</b> walk · bus · walk</div>
+        <div class="cl c3"><b>LinkETA</b> predicting 3 legs<span class="dots">…</span></div>
+        <div class="cl c4"><b class="ok">200</b> OK</div>
+        ${[["walk", "4 min"], ["bus", "12 min"], ["walk", "3 min"], ["total", "19 min"]].map(([k, v], i) => `<div class="cl c4 kv${k === "total" ? " total" : ""}" style="--i:${i}"><span>${k}</span><span>${v}</span></div>`).join("")}
+      </div>`;
+    return story({ cls: "sv", label: "Service architecture", play: "Trace a request", again: "Trace again",
+      alt: "A trip request from A to B is planned by OpenTripPlanner, timed leg by leg by the LinkETA models, and returned.",
+      map: { svg, html }, side, steps: [
+        ["Journey request", "Origin, destination and time", "A traveller asks for a trip from A to B, leaving at 08:30."],
+        ["OpenTripPlanner", "Routes and itineraries", "OpenTripPlanner plans the route: walk, bus, walk."],
+        ["Multimodal ETA API", "FastAPI service running LinkETA models", "The API asks the LinkETA models for each leg's travel time."],
+        ["Travel time per leg", "Walking, taxi and bus", "Predicted times go back to the planner, leg by leg."]] });
+  };
+  const sparkBars = h => `<svg viewBox="0 0 64 24" aria-hidden="true">${h.map((v, i) => `<rect x="${i * 11 + 2}" y="${24 - v}" width="7" height="${v}" rx="1.5"/>`).join("")}</svg>`;
+  const sparkLine = p => `<svg viewBox="0 0 64 24" aria-hidden="true"><polyline points="${p.map((v, i) => `${i * (60 / (p.length - 1)) + 2},${24 - v}`).join(" ")}" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const STAGE_VISUALS = {
+    pipeline: pipelineStory,
+    service: serviceStory,
+    dashboard: () => {
+      // Front: the check and a small chart. Back (tap to flip): the tests used for that check.
+      const tiles = [
+        ["Accuracy", "MAPE · MAE · RMSE", sparkBars([18, 13, 9]), ["MAE in seconds", "MAPE in percent", "RMSE for large misses", "Per road and per trip"]],
+        ["Significance", "Paired t-test · Wilcoxon", sparkBars([20, 6, 20, 5]), ["Paired t-test", "Wilcoxon signed-rank test", "Holm correction", "Same trips for every model"]],
+        ["Reliability", "Bootstrap intervals", sparkLine([10, 13, 11, 12, 11, 12]), ["Bootstrap confidence intervals", "Repeated runs", "Error spread across trips"]],
+        ["Error breakdown", "By trip length and time", sparkBars([8, 12, 16, 11, 7]), ["Short, medium and long trips", "Hour of day", "Peak and off-peak", "Road type"]],
+        ["Generalisation", "New cities · unseen roads", sparkLine([6, 9, 14, 13, 17, 19]), ["Train in one city, test in another", "Roads unseen in training", "New travel modes", "Adapting from a few trips"]],
+        ["Robustness", "Hidden traffic data", sparkLine([18, 17, 16, 15, 14, 13]), ["Traffic inputs hidden at rising rates", "Roads with few observations", "Noisy GPS input"]],
+        ["Speed", "GPU · CPU · laptop", sparkBars([5, 9, 20]), ["Prediction time per trip", "Cloud GPU", "Laptop GPU", "CPU only"]],
+        ["Ablation", "One component removed at a time", sparkBars([9, 20, 14, 12, 10]), ["Without recent traffic", "Without the road graph", "Without time features", "Change in error for each"]]];
+      return `<figure class="viz rv" data-kpi aria-label="Evaluation dashboard">
+      <figcaption class="viz-head"><span class="viz-title">Evaluation dashboard</span><span class="viz-tools"><span class="viz-hint">Tap a tile to see its tests</span><span class="kpi-tag">Illustrative</span></span></figcaption>
+      <div class="kpi-grid">${tiles.map(([k, d, g, tests]) => `<button type="button" class="kpi" aria-pressed="false"><span class="kpi-in">
+        <span class="kpi-face kpi-front"><span class="kpi-k">${k}</span>${g}<span class="kpi-d">${d}</span></span>
+        <span class="kpi-face kpi-back"><span class="kpi-k">${k}</span><span class="kpi-list">${tests.map(t => `<span>${t}</span>`).join("")}</span></span>
+      </span></button>`).join("")}</div>
+    </figure>`;
+    }
+  };
+
   V.thinking = function () {
-    const steps = SITE.process;
+    const steps = SITE.process, phases = SITE.processPhases || [];
+    const phaseOf = k => (phases.find(p => k >= p.from && k <= p.to) || {}).name || "";
+    const groups = phases.length ? phases : [{ name: "", from: 0, to: steps.length - 1 }];
+    // One route, four segments: the overview under the headline and the compact tracker share this markup.
+    const route = (cls, withTitles) => groups.map(p => `
+      <li class="${cls}-phase" style="--n:${p.to - p.from + 1}">${withTitles ? `<span class="${cls}-pname">${p.name}</span>` : ""}
+        <ol class="${cls}-stops">${steps.slice(p.from, p.to + 1).map((s, i) => { const k = p.from + i; return `<li class="${cls}-stop">
+          <button type="button" data-goto="step-${k}"${withTitles ? "" : ` data-rail-k="${k}" aria-label="Stage ${pad2(k + 1)}: ${s.title}" title="${s.title}"`}><span class="${cls}-dot">${pad2(k + 1)}</span>${withTitles ? `<span class="${cls}-t">${s.title}</span>` : ""}</button></li>`; }).join("")}
+        </ol></li>`).join("");
     return `
 <section class="wrap page-hero" aria-labelledby="thinking-title">
   <p class="kicker dash">Methodology</p>
-  <h1 class="display page-title lines" id="thinking-title" tabindex="-1">${lines(["How I do", "research, and", "what it taught me."])}</h1>
-  <p class="page-lede">First, the methodology: five rules I work by, each backed by a result from a real project. Then findings that go deeper into individual results.</p>
+  <h1 class="display page-title lines" id="thinking-title" tabindex="-1">${lines(["How I do research", "and build", "ML pipelines."])}</h1>
+  <p class="page-lede">Nine stages I follow on every project, from the first question to production.</p>
   <div class="jump-row"><button class="btn" type="button" data-goto="process">Methodology ${DOWN}</button><button class="btn" type="button" data-goto="notes">Findings ${DOWN}</button></div>
+  <ol class="rm rv" data-route-map aria-label="The nine stages by phase" style="--cols:${groups.map(p => `minmax(0, ${p.to - p.from + 1}fr)`).join(" ")}">${route("rm", true)}
+  </ol>
 </section>
 
-<section class="wrap" id="process" aria-labelledby="process-title" style="scroll-margin-top:90px">
+<nav class="stage-rail" data-rail aria-label="Stage tracker">
+  <div class="wrap rail-inner">
+    <ol class="rl">${route("rl", false)}
+    </ol>
+    <p class="rail-now"><span class="rail-n" data-rail-n>01</span><span class="rail-of">/ ${pad2(steps.length)}</span><span class="rail-t" data-rail-t>${steps[0] ? steps[0].title : ""}</span></p>
+  </div>
+</nav>
+
+<section class="wrap" id="process" aria-labelledby="process-title">
   <h2 class="visually-hidden" id="process-title">Methodology</h2>
-  <div class="process">
-    <aside class="process-aside" aria-label="Method steps">
-      <div class="big-num-wrap" aria-hidden="true"><span class="big-num" data-bignum>01</span><span class="big-of">/ ${pad2(steps.length)}</span></div>
-      <ol class="process-mini">${steps.map((s, k) => `<li><button type="button" data-goto="step-${k}" data-mini="${k}"${k === 0 ? ' class="active"' : ""}>${s.title}</button></li>`).join("")}</ol>
-    </aside>
-    <div class="process-steps">${steps.map((s, k) => `
-      <article class="process-step" id="step-${k}" data-step="${k}" aria-labelledby="step-title-${k}">
-        <p class="step-num" aria-hidden="true">${pad2(k + 1)}</p>
-        <p class="kicker">Step ${pad2(k + 1)}</p>
-        <h3 class="display step-title" id="step-title-${k}">${s.title}</h3>
-        <p class="step-rule">${s.rule}</p>
-        <div class="step-proof rv">
-          <div class="proof-head"><span class="mf-label">Evidence · ${s.project}</span></div>
-          <span class="proof-value" data-count>${s.value}</span>
-          <p class="proof-text">${s.proof}</p>
-          <a href="#${s.link}">${s.linkLabel} ${ARR}</a>
+  <div class="stages" data-stages>${steps.map((s, k) => `
+    <article class="stage rv" id="step-${k}" data-step="${k}" aria-labelledby="step-title-${k}">
+      <div class="stage-top"><span class="stage-dot" aria-hidden="true">${pad2(k + 1)}</span><span class="stage-phase">Stage ${pad2(k + 1)} · ${phaseOf(k)}</span></div>
+      <h3 class="stage-title" id="step-title-${k}">${s.title}</h3>
+      <div class="stage-cols">
+        <p class="stage-does">${s.does}</p>
+        <div class="stage-practice">
+          <span class="mf-label">In practice</span>
+          <p>${s.practice.replace(/\b\d+(?:\.\d+)?%|\b\d+M\+|\b\d+ trips\b/g, m => `<strong class="hl">${m}</strong>`)}</p>
+          ${s.link ? `<a href="#${s.link}">${s.linkLabel} ${ARR}</a>` : ""}
         </div>
-      </article>`).join("")}
-    </div>
+      </div>
+      ${s.visual && STAGE_VISUALS[s.visual] ? STAGE_VISUALS[s.visual]() : ""}
+    </article>`).join("")}
   </div>
 </section>
 

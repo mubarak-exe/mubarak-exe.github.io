@@ -117,7 +117,7 @@
             { t: "p", text: "LinkETA became the travel-time engine inside DTUMOS, an open-source digital twin for urban mobility, and part of my master's thesis." },
             { t: "links", items: [
               { kicker: "Project", title: "DTUMOS digital twin", text: "LinkETA powers its traffic-aware ETAs.", view: "dtumos" },
-              { kicker: "Preprint", title: "LinkETA: A Multi-Relational Graph Transformer for Link-Level Travel Time Estimation", text: "SSRN", href: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7379984" },
+              { kicker: "Paper", title: "LinkETA: A Multi-Relational Graph Transformer for Link-Level Travel Time Estimation", text: "SSRN", href: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7379984" },
               { kicker: "Thesis", title: "Intelligent Digital Twin System for Urban Mobility", text: "Wilfrid Laurier University, 2026", href: "https://scholars.wlu.ca/etd/2908/" }
             ] }
           ]
@@ -489,41 +489,66 @@
   /* ------------------------------------------------------------------ */
   /* Methodology page (#thinking): the five rules                        */
   /* ------------------------------------------------------------------ */
+  // Nine stages, grouped in four phases. does: what I do. practice: where I did it ("In practice").
+  // visual: "pipeline" | "dashboard" | "service" draws a small diagram under the stage.
+  SITE.processPhases = [
+    { name: "Learn and understand", from: 0, to: 2 },
+    { name: "Build", from: 3, to: 5 },
+    { name: "Prove", from: 6, to: 6 },
+    { name: "Deploy and publish", from: 7, to: 8 }
+  ];
   SITE.process = [
     {
-      title: "Start with the raw trace",
-      rule: "A model inherits every flaw in its data. Before modelling, I clean and structure the data myself: screen it, match it to the real world, and check what is left.",
-      project: "LinkETA", value: "8M+",
-      proof: "road-segment data points, built by a geospatial ETL pipeline from raw taxi GPS trips.",
-      link: "linketa", linkLabel: "See the pipeline"
+      title: "Landscape and Gap Analysis",
+      does: "I trace how the field evolved, framework by framework, through systematic PRISMA reviews, then narrow the problem to the gap that remains unsolved.",
+      practice: "A decade of travel-time research, traced to the gap that LinkETA fills.",
+      link: "linketa", linkLabel: "See LinkETA"
     },
     {
-      title: "Compare against the strongest baseline",
-      rule: "A result only means something next to a serious alternative. I benchmark against the strongest systems I can find, including ones used in industry.",
-      project: "LinkETA", value: "23.7%",
-      proof: "lower error than Baidu's DuETA, and 17.6% lower than Uber's DeeprETA, on average.",
+      title: "Problem Formulation and Data Engineering",
+      does: "I define inputs, outputs and the success measure precisely, then build ETL pipelines that turn raw data into clean, validated datasets, with leak and consistency checks at every step.",
+      practice: "Raw GPS from taxis, private cars and buses, turned into 8M+ road-level data points across six datasets on three continents.",
+      visual: "pipeline"
+    },
+    {
+      title: "Exploratory Data Analysis",
+      does: "I measure sparsity, check which features are available everywhere, and remove features that repeat the same information. These findings become the model's requirements.",
+      practice: "Most observations sit on a few roads, so the model was built to handle roads it rarely sees."
+    },
+    {
+      title: "Architecture Design",
+      does: "I design each component to answer a specific limitation in the data, drawing on ideas from the literature.",
+      practice: "MetaETA was built for cities with almost no data. It adapts to a new city from just 25 trips, with up to 14.2% lower road-segment error."
+    },
+    {
+      title: "Benchmarking",
+      does: "I implement state-of-the-art models, including production systems from Baidu and Uber, and test them on the same data and trips as my own.",
+      practice: "Six published baselines. LinkETA had 23.7% lower error than Baidu's DuETA and 17.6% lower than Uber's DeeprETA.",
       link: "linketa", linkLabel: "See the comparison"
     },
     {
-      title: "Design for the city with no data",
-      rule: "Real deployments start where data is thin. I test whether a method still works when a new place has only a handful of examples.",
-      project: "LinkETA", value: "25 trips",
-      proof: "per new city were enough for meta-learning to cut road-segment error by up to 14.2%.",
-      link: "note-25-trips", linkLabel: "Read the finding"
+      title: "Training and Experimentation",
+      does: "I fix every setting up front, check inputs automatically before training, cache prepared data for fast reruns, and split data by time so nothing leaks from test to training.",
+      practice: "Five loss-balancing methods compared, with reproducible training runs on cloud GPUs."
     },
     {
-      title: "Put the model inside a system",
-      rule: "A model becomes useful when something depends on it. I integrate models into the tools that will use them and watch how they behave there.",
-      project: "DTUMOS", value: "1 min",
-      proof: "simulation steps, with LinkETA supplying traffic-aware travel times inside the digital twin.",
-      link: "dtumos", linkLabel: "See DTUMOS"
+      title: "Evaluation and Ablation",
+      does: "I test reliability, statistical significance (t-test, Wilcoxon), error by trip type, generalisation to new cities and travel modes, robustness to missing data, and speed across hardware. Ablations remove one component at a time to measure its value. Results are tracked on dashboards with clear KPIs.",
+      practice: "Recent traffic proved the strongest signal, and the road graph matters most where data is missing.",
+      visual: "dashboard"
     },
     {
-      title: "Check before you trust",
-      rule: "Fluent output is not correct output, and lab accuracy is not real-world accuracy. I build checks into systems and look for evidence outside controlled settings.",
-      project: "Text2Simulation", value: "96.7%",
-      proof: "of unsupported requests caught by the verifier, with zero false alarms.",
-      link: "text2simulation", linkLabel: "See the verifier"
+      title: "Deployment and MLOps",
+      does: "I package trained models as REST APIs and deploy them on AWS for real-time use.",
+      practice: "Multimodal ETA, a FastAPI service that brings predicted travel times into OpenTripPlanner for door-to-door journeys by walking, taxi and bus. It halves the bus travel-time error of timetable estimates (7.4% vs 15.2%). Text2Simulation runs as a web app.",
+      link: "text2simulation", linkLabel: "See Text2Simulation",
+      visual: "service"
+    },
+    {
+      title: "Publication",
+      does: "I publish methods and results, present them at conferences, and answer peer review point by point.",
+      practice: "The LinkETA journal paper (under review), an IEEE WF-IoT 2026 talk, and a systematic review with SQUAD Lab.",
+      link: "dementia-review", linkLabel: "See the review"
     }
   ];
 
@@ -661,7 +686,7 @@
 
   SITE.publications = [
     { title: "Intelligent Digital Twin System for Urban Mobility", meta: "Master's thesis · Wilfrid Laurier University · 2026", href: "https://scholars.wlu.ca/etd/2908/" },
-    { title: "LinkETA: A Multi-Relational Graph Transformer for Link-Level Travel Time Estimation", meta: "Preprint · SSRN", href: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7379984" },
+    { title: "LinkETA: A Multi-Relational Graph Transformer for Link-Level Travel Time Estimation", meta: "SSRN", href: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7379984" },
     { title: "Link-Level Spatio-Temporal Travel Time Prediction for Multi-Modal Commute Trip Estimation", meta: "IEEE Xplore" },
     { title: "Text2Simulation: A Natural Language Interface for Transportation Digital Twin Systems", meta: "IEEE Xplore" },
     { title: "Fake News Detection Using Hybrid BiLSTM-TCN Model with Attention Mechanism", meta: "IEEE Xplore · 2023", href: "https://ieeexplore.ieee.org/document/10140491" }

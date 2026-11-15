@@ -203,28 +203,102 @@
     }));
   }
 
-  /* ---------------- Thinking: sticky step counter ---------------- */
+  /* ---------------- Methodology: stage tracker, playable diagrams, dashboard ---------------- */
   function setupProcess() {
-    const steps = [...main.querySelectorAll(".process-step")], big = main.querySelector("[data-bignum]");
-    const minis = [...main.querySelectorAll("[data-mini]")];
+    const stages = [...main.querySelectorAll(".stage")], rail = main.querySelector("[data-rail]");
+    const map = main.querySelector("[data-route-map]"), list = main.querySelector("[data-stages]");
     if (pendingStep != null) {
       const target = main.querySelector("#step-" + pendingStep);
       pendingStep = null;
       if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
     }
-    if (!steps.length || !big || !("IntersectionObserver" in g)) return;
-    let cur = 0;
-    const io = new IntersectionObserver(entries => entries.forEach(en => {
-      if (!en.isIntersecting) return;
-      const k = +en.target.dataset.step;
+    setupKpis();
+    setupFlows();
+    if (!stages.length || !("IntersectionObserver" in g)) return;
+    const nodes = rail ? [...rail.querySelectorAll("[data-rail-k]")] : [];
+    const railN = rail && rail.querySelector("[data-rail-n]"), railT = rail && rail.querySelector("[data-rail-t]");
+    let cur = -1;
+    const setActive = k => {
       if (k === cur) return;
       cur = k;
-      big.textContent = pad2(k + 1);
-      if (!reduced()) { big.classList.remove("bump"); void big.offsetWidth; big.classList.add("bump"); }
-      minis.forEach(m => m.classList.toggle("active", +m.dataset.mini === k));
-    }), { rootMargin: "-40% 0px -55% 0px" });
-    steps.forEach(s => io.observe(s));
+      stages.forEach((s, i) => s.classList.toggle("is-active", i === k));
+      nodes.forEach((b, i) => {
+        b.classList.toggle("on", i === k);
+        b.classList.toggle("done", i < k);
+        if (i === k) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+      });
+      if (railN) railN.textContent = pad2(k + 1);
+      if (railT) { const t = stages[k].querySelector(".stage-title"); railT.textContent = t ? t.textContent : ""; }
+    };
+    setActive(0);
+    const io = new IntersectionObserver(entries => entries.forEach(en => {
+      if (en.isIntersecting) setActive(+en.target.dataset.step);
+    }), { rootMargin: "-38% 0px -58% 0px" });
+    stages.forEach(s => io.observe(s));
     cleanups.push(() => io.disconnect());
+    // The compact tracker shows once the overview route has scrolled away, and hides again at Findings.
+    if (!rail || !map || !list) return;
+    let mapGone = false, inList = false;
+    const paint = () => rail.classList.toggle("show", mapGone && inList);
+    const top = Math.round(header.getBoundingClientRect().height) || 68;
+    const ioMap = new IntersectionObserver(([en]) => { mapGone = !en.isIntersecting && en.boundingClientRect.top < top; paint(); },
+      { rootMargin: `-${top}px 0px 0px 0px` });
+    const ioList = new IntersectionObserver(([en]) => { inList = en.isIntersecting; paint(); },
+      { rootMargin: `-${top + 90}px 0px -40% 0px` });
+    ioMap.observe(map);
+    ioList.observe(list);
+    cleanups.push(() => { ioMap.disconnect(); ioList.disconnect(); });
+  }
+
+  // Dashboard tiles: tap one to flip it and see the tests behind that check; tap again to flip back.
+  function setupKpis() {
+    main.querySelectorAll("[data-kpi]").forEach(board => {
+      board.addEventListener("click", e => {
+        const t = e.target.closest(".kpi");
+        if (t) t.setAttribute("aria-pressed", String(t.getAttribute("aria-pressed") !== "true"));
+      });
+    });
+  }
+
+  // Story visuals: collapsed until Play; Play opens the panel and steps through the stops (classes s1, s2, ...).
+  function setupFlows() {
+    main.querySelectorAll("[data-flow]").forEach(fig => {
+      const stops = [...fig.querySelectorAll(".fl-step")], btn = fig.querySelector("[data-flow-play]");
+      const hide = fig.querySelector("[data-flow-hide]"), label = btn && btn.querySelector("span");
+      const first = label ? label.textContent : "";
+      const cap = fig.querySelector("[data-flow-cap]"), STEP = 1500;
+      let timers = [];
+      const stop = () => { timers.forEach(clearTimeout); timers = []; };
+      const reach = (i, now) => {
+        stops.forEach((x, j) => { x.classList.toggle("lit", j <= i); x.classList.toggle("now", now && j === i); });
+        for (let j = 1; j <= stops.length; j++) fig.classList.toggle("s" + j, j <= i + 1);
+        if (cap && stops[i]) cap.textContent = stops[i].dataset.cap;
+      };
+      const finish = () => { reach(stops.length - 1, false); fig.classList.remove("running"); };
+      const open = on => {
+        fig.classList.toggle("open", on);
+        if (btn) btn.setAttribute("aria-expanded", String(on));
+        if (hide) hide.hidden = !on;
+        if (label) label.textContent = on ? (btn.dataset.again || first) : first;
+      };
+      const run = () => {
+        stop();
+        open(true);
+        if (reduced()) { finish(); return; }
+        // Jump back to the start without animating the reset, then play once the panel has opened.
+        fig.classList.add("reset");
+        reach(-1, false);
+        void fig.offsetWidth;
+        fig.classList.remove("reset");
+        fig.classList.add("running");
+        stops.forEach((s, i) => timers.push(setTimeout(() => reach(i, true), 450 + i * STEP)));
+        timers.push(setTimeout(finish, 450 + stops.length * STEP));
+      };
+      finish(); // collapsed view shows the complete line of stops
+      if (btn) btn.addEventListener("click", run);
+      if (hide) hide.addEventListener("click", () => { stop(); finish(); open(false); if (btn) btn.focus(); });
+      cleanups.push(stop);
+    });
   }
 
   /* ---------------- About: timeline drawn by scroll ---------------- */
