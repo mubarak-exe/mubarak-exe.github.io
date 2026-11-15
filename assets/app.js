@@ -257,13 +257,15 @@
     const items = [...grid.children];
     grid.classList.add("is-js");
     let raf = 0, lastW = -1, readyT = 0;
-    const px = (name, fallback) => parseFloat(getComputedStyle(grid).getPropertyValue(name)) || fallback;
     const layout = force => {
       raf = 0;
       const W = grid.clientWidth;
       if (!W || (W === lastW && !force)) return;
       lastW = W;
-      const gapX = px("--gap-x", 24), gapY = px("--gap-y", 32);
+      // Read the gaps the browser has already resolved (the CSS sets them with clamp(), which
+      // parseFloat can't read from the raw custom property).
+      const cs = getComputedStyle(grid);
+      const gapX = parseFloat(cs.columnGap) || 10, gapY = parseFloat(cs.rowGap) || 10;
       const minCol = W < 560 ? 140 : 220;
       const cols = Math.max(2, Math.min(4, Math.floor((W + gapX) / (minCol + gapX))));
       const colW = (W - gapX * (cols - 1)) / cols;

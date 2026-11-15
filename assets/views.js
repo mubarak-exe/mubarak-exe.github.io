@@ -696,7 +696,8 @@
     const name = ph.title || `photo ${i + 1}`;
     const t = photoTitle(ph), m = photoMeta(ph);
     const cap = t || m ? `<span class="ph-cap">${t ? `<span class="ph-title">${esc(t)}</span>` : ""}${m ? `<span class="ph-meta">${esc(m)}</span>` : ""}</span>` : "";
-    return `<li class="ph-item"><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}</span>${cap}</button></li>`;
+    // The caption sits on the photo itself (bottom, over a soft fade), so tiles pack tightly like a collage.
+    return `<li class="ph-item"><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}${cap}</span></button></li>`;
   }
 
   // Collage order: a fresh mix on every visit that keeps neighbouring photos different in colour,
@@ -733,7 +734,7 @@
         const p = pool.splice(i, 1)[0];
         near.forEach(q => { clash += Math.exp(-3 * diff(p, q)); });   // how much look-alikes touch (lower is better)
         out.push(p); last[c] = p;
-        heights[c] += Math.exp(-feat.get(p).r) + 0.18;               // height / width, plus caption and gap
+        heights[c] += Math.exp(-feat.get(p).r) + 0.035;              // height / width, plus the gap
       }
       return { out, clash };
     }
@@ -744,7 +745,7 @@
   // The column count the grid will use (same rule as setupMasonry in app.js).
   function columnsGuess() {
     const vw = typeof window !== "undefined" && window.innerWidth ? window.innerWidth : 1280;
-    const gutter = vw >= 1100 ? 48 : vw >= 720 ? 32 : 16, W = Math.min(vw, 1280) - 2 * gutter, gap = 12;
+    const gutter = vw >= 1100 ? 48 : vw >= 720 ? 32 : 16, W = Math.min(vw, 1280) - 2 * gutter, gap = 8;
     return Math.max(2, Math.min(4, Math.floor((W + gap) / ((W < 560 ? 140 : 220) + gap))));
   }
 
