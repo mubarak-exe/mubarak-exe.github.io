@@ -12,7 +12,7 @@
     github: "https://github.com/mubarak-exe",
     githubLabel: "github.com/mubarak-exe",
     location: "Waterloo, Ontario, Canada",
-    coords: "43.4647° N, 80.5222° W · Uptown Waterloo",
+    coords: "43.465° N, 80.523° W",
     status: "Looking for machine learning and research roles in Canada.",
     // Website copy of the resume (title "Machine Learning Researcher", no phone number); built from resume.tex.
     resume: "assets/Mubarak_Shikalgar_Resume.pdf",
