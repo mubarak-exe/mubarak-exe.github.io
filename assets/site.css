@@ -234,6 +234,8 @@ kbd {
 .now-list > div { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--line); align-items: baseline; }
 .now-list dt, .label-mono { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .now-list dd { font-size: 0.98rem; }
+/* Second line under a position: the organisation (or the award under the degree) */
+.dd-sub { display: block; margin-top: 2px; font-size: 0.92em; color: var(--muted); }
 
 /* Night-map card (hero) */
 .map-card { margin: 0; background: var(--band); color: var(--band-ink); border: 1px solid var(--band-line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); min-width: 0; }

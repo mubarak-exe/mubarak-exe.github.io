@@ -353,9 +353,9 @@
     <div class="hero-intro">
       <p class="lede">I'm ${P.name}, a machine learning researcher in Waterloo, Ontario. I build travel-time models, digital twins and LLM agents for urban mobility.</p>
       <dl class="now-list">
-        <div><dt>Now</dt><dd>Research Assistant, SPIN Lab, Wilfrid Laurier University</dd></div>
-        <div><dt>Degree</dt><dd>Master of Applied Computing, 2026, with the Award for Outstanding Graduate Work</dd></div>
-        <div><dt>Before</dt><dd>IT Consultant, Glazingshopee, Mumbai</dd></div>
+        <div><dt>Now</dt><dd>Research Assistant<span class="dd-sub">SPIN Lab, Wilfrid Laurier University</span></dd></div>
+        <div><dt>Degree</dt><dd>Master of Applied Computing, 2026<span class="dd-sub">Award for Outstanding Graduate Work</span></dd></div>
+        <div><dt>Before</dt><dd>IT Consultant<span class="dd-sub">Glazingshopee, Mumbai</span></dd></div>
       </dl>
       <div class="actions"><a class="btn btn-primary" href="#work">See the work ${ARR}</a><a class="btn" href="#thinking">How I think ${ARR}</a></div>
       <p class="learn-credit">Background: streets of San Francisco, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
@@ -543,7 +543,7 @@
     <p class="kicker">At a glance</p>
     <dl>
       <div><dt>Based in</dt><dd>${P.location}<br><span class="mono-sm">${P.coords}</span></dd></div>
-      <div><dt>Now</dt><dd>Research Assistant, SPIN Lab, Wilfrid Laurier University</dd></div>
+      <div><dt>Now</dt><dd>Research Assistant<span class="dd-sub">SPIN Lab, Wilfrid Laurier University</span></dd></div>
       <div><dt>Focus</dt><dd>Travel-time estimation, digital twins, LLM agents</dd></div>
       <div><dt>Open to</dt><dd>Machine learning and research roles in Canada</dd></div>
     </dl>
