@@ -506,7 +506,7 @@
     },
     {
       title: "Problem Formulation and Data Engineering",
-      does: "I define inputs, outputs and the success measure precisely, then build ETL pipelines that turn raw data into clean, validated datasets, with leak and consistency checks at every step.",
+      does: "I define inputs, outputs and the success metric precisely, then build ETL pipelines that turn raw data into clean, validated datasets, with leak and consistency checks at every step.",
       practice: "Raw GPS from taxis, private cars and buses, turned into 8M+ road-level data points across six datasets on three continents.",
       visual: "pipeline"
     },
