@@ -677,18 +677,14 @@
   // Placeholder frames (no src) show [bracket] prompts; real photos show only the details filled in.
   const photoTitle = ph => ph.title || (ph.src ? "" : "[Photo title]");
   const photoMeta = ph => ph.src ? [ph.place, ph.year].filter(Boolean).join(" · ") : `${ph.place || "[Place]"} · ${ph.year || "[Year]"}`;
-  // Wide photos (at least 1.3 times wider than tall) span two columns of the collage, so they aren't
-  // squeezed into one narrow column and shown small.
   const photoAspect = ph => { const [a, b] = String(ph.ratio || "1 / 1").split("/").map(parseFloat); return a && b ? a / b : 1; };
-  const isWide = ph => !!ph.src && photoAspect(ph) >= 1.3;
   // Grid tiles let the browser pick the small copy (thumb) or the full one; the viewer (full) always loads the full one.
-  const TILE_SIZES = "(max-width: 560px) 50vw, (max-width: 1100px) 33vw, 300px";
-  const WIDE_SIZES = "(max-width: 560px) 100vw, (max-width: 1100px) 66vw, 600px";
+  const TILE_SIZES = "(max-width: 560px) 60vw, (max-width: 1100px) 35vw, 340px";
   function photoFrame(ph, i, eager, full) {
     if (ph.src) {
       const alt = ` alt="${esc(ph.alt || ph.title || "")}"`, lazy = eager ? "" : ' loading="lazy"';
       if (!full && ph.thumb && ph.tw && ph.w) {
-        return `<img src="${esc(ph.thumb)}" srcset="${esc(ph.thumb)} ${ph.tw}w, ${esc(ph.src)} ${ph.w}w" sizes="${isWide(ph) ? WIDE_SIZES : TILE_SIZES}"${alt}${lazy} decoding="async">`;
+        return `<img src="${esc(ph.thumb)}" srcset="${esc(ph.thumb)} ${ph.tw}w, ${esc(ph.src)} ${ph.w}w" sizes="${TILE_SIZES}"${alt}${lazy} decoding="async">`;
       }
       return `<img src="${esc(ph.src)}"${alt}${lazy} decoding="async">`;
     }
@@ -702,7 +698,8 @@
     const t = photoTitle(ph), m = photoMeta(ph);
     const cap = t || m ? `<span class="ph-cap">${t ? `<span class="ph-title">${esc(t)}</span>` : ""}${m ? `<span class="ph-meta">${esc(m)}</span>` : ""}</span>` : "";
     // The caption sits on the photo itself (bottom, over a soft fade), so tiles pack tightly like a collage.
-    return `<li class="ph-item${isWide(ph) ? " ph-wide" : ""}"${isWide(ph) ? ' data-wide="1"' : ""}><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}${cap}</span></button></li>`;
+    // data-ar (width / height) lets the grid size each tile to its row (setupMasonry in app.js).
+    return `<li class="ph-item" data-ar="${photoAspect(ph).toFixed(4)}"><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}${cap}</span></button></li>`;
   }
 
   // Collage order: a fresh mix on every visit that keeps neighbouring photos different in colour,
@@ -713,44 +710,25 @@
     if (real.length < 3) return list;
     // Each photo's numbers, worked out once: hue, saturation, brightness and log of its shape.
     const feat = new Map(real.map(p => {
-      const [h, s, v] = p.tone || [0, 0, 0.5], ar = photoAspect(p);
-      return [p, { h, s, v, ar, r: Math.log(ar), wide: isWide(p) }];
+      const [h, s, v] = p.tone || [0, 0, 0.5];
+      return [p, { h, s, v, r: Math.log(photoAspect(p)) }];
     }));
     const diff = (p, q) => {
       const A = feat.get(p), B = feat.get(q), dh = Math.min(Math.abs(A.h - B.h), 360 - Math.abs(A.h - B.h)) / 180;
       return 1.6 * dh * Math.min(A.s, B.s) + 1.4 * Math.abs(A.v - B.v) + 0.6 * Math.abs(A.s - B.s) + 0.5 * Math.abs(A.r - B.r);
     };
-    // Plan with the real columns: the grid (setupMasonry in app.js) drops each photo into the shortest
-    // column, and each wide photo across the two neighbouring columns that are lowest. The mix does the same
-    // with estimated tile heights, picks each photo to differ from the photos above and beside it, and only
-    // places a wide photo where its two columns are nearly level, so it leaves no big hole.
-    const cols = columnsGuess(), GAP = 0.035;   // gap between tiles, in column widths
+    // The grid lays photos out in rows, left to right. So a photo's neighbours are the few placed just
+    // before it: the one to its left and, about a row back, the ones above it.
+    const per = rowGuess(real);
     function arrange() {
-      const pool = real.slice(), out = [], H = new Array(cols).fill(0), last = new Array(cols).fill(null);
+      const pool = real.slice(), out = [pool.splice(Math.floor(Math.random() * pool.length), 1)[0]];
       let clash = 0;
       while (pool.length) {
-        let c1 = 0, c2 = 0, top2 = Infinity;
-        for (let k = 1; k < cols; k++) if (H[k] < H[c1] - 1e-6) c1 = k;                 // slot for a normal photo
-        for (let k = 0; k < cols - 1; k++) { const t = Math.max(H[k], H[k + 1]); if (t < top2 - 1e-6) { top2 = t; c2 = k; } }
-        const hole = Math.abs(H[c2] - H[c2 + 1]);                                         // empty space a wide photo would leave
-        const nearOne = [last[c1], last[c1 - 1], last[c1 + 1]].filter(Boolean);
-        const nearTwo = [last[c2], last[c2 + 1], last[c2 - 1], last[c2 + 2]].filter(Boolean);
-        const scored = pool.map((p, j) => {
-          const wide = feat.get(p).wide, near = wide ? nearTwo : nearOne;
-          const d = near.length ? Math.min(...near.map(q => diff(p, q))) : 1;
-          return { j, s: d - (wide ? 2.5 * hole : 0) };
-        }).sort((a, b) => b.s - a.s);
+        const recent = out.slice(-(per + 1));
+        const scored = pool.map((p, j) => ({ j, s: Math.min(...recent.map(q => diff(p, q))) })).sort((a, b) => b.s - a.s);
         const p = pool.splice(scored[Math.floor(Math.random() * Math.min(3, scored.length))].j, 1)[0];
-        const F = feat.get(p);
-        (F.wide ? nearTwo : nearOne).forEach(q => { clash += Math.exp(-3 * diff(p, q)); });   // look-alikes touching
+        recent.forEach(q => { clash += Math.exp(-3 * diff(p, q)); });   // look-alikes near each other (lower is better)
         out.push(p);
-        if (F.wide) {
-          const h = (2 + GAP) / F.ar + GAP;
-          H[c2] = H[c2 + 1] = top2 + h; last[c2] = last[c2 + 1] = p;
-          clash += hole;                                                                  // holes count against it too
-        } else {
-          H[c1] += 1 / F.ar + GAP; last[c1] = p;
-        }
       }
       return { out, clash };
     }
@@ -758,11 +736,14 @@
     for (let k = 0; k < 8; k++) { const a = arrange(); if (!best || a.clash < best.clash) best = a; }
     return best.out.concat(rest);
   }
-  // The column count the grid will use (same rule as setupMasonry in app.js).
-  function columnsGuess() {
+  // About how many photos fit in one row of the collage at this screen width (same row height targets
+  // as setupMasonry in app.js).
+  function rowGuess(real) {
     const vw = typeof window !== "undefined" && window.innerWidth ? window.innerWidth : 1280;
-    const gutter = vw >= 1100 ? 48 : vw >= 720 ? 32 : 16, W = Math.min(vw, 1280) - 2 * gutter, gap = 8;
-    return Math.max(2, Math.min(4, Math.floor((W + gap) / ((W < 560 ? 140 : 220) + gap))));
+    const gutter = vw >= 1100 ? 48 : vw >= 720 ? 32 : 16, W = Math.min(vw, 1280) - 2 * gutter;
+    const target = W < 560 ? 170 : W < 1000 ? 230 : 290;
+    const avg = real.reduce((s, p) => s + photoAspect(p), 0) / real.length;
+    return Math.max(2, Math.round(W / (target * avg)));
   }
 
   V.photography = function () {

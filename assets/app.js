@@ -247,14 +247,18 @@
     cleanups.push(() => { g.removeEventListener("scroll", on); g.removeEventListener("resize", on); cancelAnimationFrame(raf); });
   }
 
-  /* ---------------- Photography: masonry grid in reading order ----------------
-     Without JavaScript the grid falls back to CSS columns. With it, each photo is
-     placed in the shortest column, left to right, so the order in content.js is
-     the order people see. Columns: 2 on phones, up to 4 on wide screens. */
+  /* ---------------- Photography: justified collage ----------------
+     Without JavaScript the grid falls back to CSS columns. With it, photos are laid out in rows,
+     left to right: every photo keeps its shape, and each row is scaled so its photos share one
+     height and exactly fill the width, so the whole collage is a clean rectangle. Wide photos come
+     out wider than tall ones at the same height (about a third of a row on desktop). Which photos
+     share a row is chosen by a small search (dynamic programming) that keeps every row, the last
+     one included, close to the target height. */
   function setupMasonry() {
     const grid = main.querySelector("[data-masonry]");
     if (!grid) return;
     const items = [...grid.children];
+    const ar = items.map(it => parseFloat(it.dataset.ar) || 1);   // width / height of each photo
     grid.classList.add("is-js");
     let raf = 0, lastW = -1, readyT = 0;
     const layout = force => {
@@ -265,28 +269,37 @@
       // Read the gaps the browser has already resolved (the CSS sets them with clamp(), which
       // parseFloat can't read from the raw custom property).
       const cs = getComputedStyle(grid);
-      const gapX = parseFloat(cs.columnGap) || 10, gapY = parseFloat(cs.rowGap) || 10;
-      const minCol = W < 560 ? 140 : 220;
-      const cols = Math.max(2, Math.min(4, Math.floor((W + gapX) / (minCol + gapX))));
-      const colW = (W - gapX * (cols - 1)) / cols;
-      const wide = it => it.dataset.wide === "1";   // wide photos span two columns
-      items.forEach(it => { it.style.width = (wide(it) ? 2 * colW + gapX : colW) + "px"; });
-      const hs = items.map(it => it.offsetHeight);
-      const heights = new Array(cols).fill(0);
-      items.forEach((it, i) => {
-        let c = 0, top;
-        if (wide(it)) {   // the two neighbouring columns whose lower one is highest up
-          top = Infinity;
-          for (let k = 0; k < cols - 1; k++) { const t = Math.max(heights[k], heights[k + 1]); if (t < top - 1) { top = t; c = k; } }
-          heights[c] = heights[c + 1] = top + hs[i] + gapY;
-        } else {
-          for (let k = 1; k < cols; k++) if (heights[k] < heights[c] - 1) c = k;
-          top = heights[c];
-          heights[c] += hs[i] + gapY;
+      const gapX = parseFloat(cs.columnGap) || 8, gapY = parseFloat(cs.rowGap) || 8;
+      const target = W < 560 ? 170 : W < 1000 ? 230 : 290;   // ideal row height in px (same as rowGuess in views.js)
+      // best[i]: lowest total cost of laying out photos i..n-1; next[i]: where the row starting at i ends.
+      const n = ar.length, best = new Array(n + 1).fill(Infinity), next = new Array(n + 1).fill(n);
+      best[n] = 0;
+      for (let i = n - 1; i >= 0; i--) {
+        let sum = 0;
+        for (let j = i; j < n && j < i + 8; j++) {
+          sum += ar[j];
+          const h = (W - gapX * (j - i)) / sum;               // the row's height if photos i..j share it
+          if (h < target * 0.5) break;                         // more photos would make the row too thin
+          const c = Math.pow((h - target) / target, 2) + best[j + 1];
+          if (c < best[i]) { best[i] = c; next[i] = j + 1; }
         }
-        it.style.transform = `translate(${Math.round(c * (colW + gapX))}px, ${Math.round(top)}px)`;
-      });
-      grid.style.height = Math.max(0, Math.max.apply(null, heights) - gapY) + "px";
+      }
+      let y = 0;
+      for (let i = 0; i < n; i = next[i]) {
+        const j = next[i];
+        let sum = 0;
+        for (let k = i; k < j; k++) sum += ar[k];
+        const h = (W - gapX * (j - i - 1)) / sum;
+        let x = 0;
+        for (let k = i; k < j; k++) {
+          const w = ar[k] * h;
+          items[k].style.width = w + "px";
+          items[k].style.transform = `translate(${x}px, ${y}px)`;
+          x += w + gapX;
+        }
+        y += h + gapY;
+      }
+      grid.style.height = Math.max(0, y - gapY) + "px";
     };
     const schedule = force => { if (!raf) raf = requestAnimationFrame(() => layout(force)); };
     layout(true);
