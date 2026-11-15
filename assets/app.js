@@ -247,13 +247,11 @@
     cleanups.push(() => { g.removeEventListener("scroll", on); g.removeEventListener("resize", on); cancelAnimationFrame(raf); });
   }
 
-  /* ---------------- Photography: justified collage ----------------
-     Without JavaScript the grid falls back to CSS columns. With it, photos are laid out in rows,
-     left to right: every photo keeps its shape, and each row is scaled so its photos share one
-     height and exactly fill the width, so the whole collage is a clean rectangle. Wide photos come
-     out wider than tall ones at the same height (about a third of a row on desktop). Which photos
-     share a row is chosen by a small search (dynamic programming) that keeps every row, the last
-     one included, close to the target height. */
+  /* ---------------- Photography: collage ----------------
+     Without JavaScript the grid falls back to CSS columns. With it, every photo keeps its true shape
+     and about the same area: tall photos a quarter of the desktop width, wide photos a third (full
+     width on phones). Photos stack neatly into the grid of SITE.collage (views.js), each placed where
+     it sits highest without leaving gaps; the bottom edge is left ragged. */
   function setupMasonry() {
     const grid = main.querySelector("[data-masonry]");
     if (!grid) return;
@@ -270,36 +268,13 @@
       // parseFloat can't read from the raw custom property).
       const cs = getComputedStyle(grid);
       const gapX = parseFloat(cs.columnGap) || 8, gapY = parseFloat(cs.rowGap) || 8;
-      const target = W < 560 ? 170 : W < 1000 ? 230 : 290;   // ideal row height in px (same as rowGuess in views.js)
-      // best[i]: lowest total cost of laying out photos i..n-1; next[i]: where the row starting at i ends.
-      const n = ar.length, best = new Array(n + 1).fill(Infinity), next = new Array(n + 1).fill(n);
-      best[n] = 0;
-      for (let i = n - 1; i >= 0; i--) {
-        let sum = 0;
-        for (let j = i; j < n && j < i + 8; j++) {
-          sum += ar[j];
-          const h = (W - gapX * (j - i)) / sum;               // the row's height if photos i..j share it
-          if (h < target * 0.5) break;                         // more photos would make the row too thin
-          const c = Math.pow((h - target) / target, 2) + best[j + 1];
-          if (c < best[i]) { best[i] = c; next[i] = j + 1; }
-        }
-      }
-      let y = 0;
-      for (let i = 0; i < n; i = next[i]) {
-        const j = next[i];
-        let sum = 0;
-        for (let k = i; k < j; k++) sum += ar[k];
-        const h = (W - gapX * (j - i - 1)) / sum;
-        let x = 0;
-        for (let k = i; k < j; k++) {
-          const w = ar[k] * h;
-          items[k].style.width = w + "px";
-          items[k].style.transform = `translate(${x}px, ${y}px)`;
-          x += w + gapX;
-        }
-        y += h + gapY;
-      }
-      grid.style.height = Math.max(0, y - gapY) + "px";
+      const pk = SITE.collage.packer(W, gapX, gapY);
+      items.forEach((it, i) => {
+        const t = pk.place(ar[i], pk.fit(ar[i]), true);
+        it.style.width = t.w + "px";
+        it.style.transform = `translate(${Math.round(t.x)}px, ${Math.round(t.y)}px)`;
+      });
+      grid.style.height = pk.height() + "px";
     };
     const schedule = force => { if (!raf) raf = requestAnimationFrame(() => layout(force)); };
     layout(true);

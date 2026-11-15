@@ -700,7 +700,7 @@
     const t = photoTitle(ph), m = photoMeta(ph);
     const cap = t || m ? `<span class="ph-cap">${t ? `<span class="ph-title">${esc(t)}</span>` : ""}${m ? `<span class="ph-meta">${esc(m)}</span>` : ""}</span>` : "";
     // The caption sits on the photo itself (bottom, over a soft fade), so tiles pack tightly like a collage.
-    // data-ar (width / height) lets the grid size each tile to its row (setupMasonry in app.js).
+    // data-ar (width / height) lets the grid size each tile (setupMasonry in app.js).
     return `<li class="ph-item" data-ar="${photoAspect(ph).toFixed(4)}"><button class="ph-card rv" type="button" data-photo="${i}" aria-label="Open ${esc(name)}"><span class="ph-frame"${ratio}>${photoFrame(ph, i)}${cap}</span></button></li>`;
   }
 
@@ -719,17 +719,31 @@
       const A = feat.get(p), B = feat.get(q), dh = Math.min(Math.abs(A.h - B.h), 360 - Math.abs(A.h - B.h)) / 180;
       return 1.6 * dh * Math.min(A.s, B.s) + 1.4 * Math.abs(A.v - B.v) + 0.6 * Math.abs(A.s - B.s) + 0.5 * Math.abs(A.r - B.r);
     };
-    // The grid lays photos out in rows, left to right. So a photo's neighbours are the few placed just
-    // before it: the one to its left and, about a row back, the ones above it.
-    const per = rowGuess(real);
+    // Plan with the same packer the page uses (SITE.collage, below), at this screen's expected width:
+    // each photo goes where the packer will put it, and is picked to fit that spot neatly, to differ
+    // from the photos it will touch, and not to sit right on top of another wide photo.
+    const vw = typeof window !== "undefined" && window.innerWidth ? window.innerWidth : 1280;
+    const gutter = vw >= 1100 ? 48 : vw >= 720 ? 32 : 16, W = Math.min(vw, 1280) - 2 * gutter;
+    const gap = Math.min(10, Math.max(6, 0.008 * vw));   // same as --gap-x / --gap-y in site.css
+    const wideP = p => photoAspect(p) >= 1.2;
     function arrange() {
-      const pool = real.slice(), out = [pool.splice(Math.floor(Math.random() * pool.length), 1)[0]];
+      const pk = COLLAGE.packer(W, gap, gap), pool = real.slice(), out = [];
       let clash = 0;
       while (pool.length) {
-        const recent = out.slice(-(per + 1));
-        const scored = pool.map((p, j) => ({ j, s: Math.min(...recent.map(q => diff(p, q))) })).sort((a, b) => b.s - a.s);
-        const p = pool.splice(scored[Math.floor(Math.random() * Math.min(3, scored.length))].j, 1)[0];
-        recent.forEach(q => { clash += Math.exp(-3 * diff(p, q)); });   // look-alikes near each other (lower is better)
+        const fits = pool.map(p => pk.fit(photoAspect(p)));
+        const lowest = Math.min(...fits.map(f => f.score));
+        const scored = pool.map((p, j) => {
+          const f = fits[j], near = pk.around(f);
+          let d = 1;
+          near.forEach(q => { d = Math.min(d, diff(p, q)); });
+          const onWide = wideP(p) && pk.under(f).some(wideP);
+          return { j, f, near, s: d - (f.score - lowest) / (3 * pk.pitch) - (onWide ? 2 : 0) };
+        }).sort((a, b) => b.s - a.s);
+        const pick = scored[Math.floor(Math.random() * Math.min(3, scored.length))];
+        const p = pool.splice(pick.j, 1)[0];
+        pick.near.forEach(q => { clash += Math.exp(-3 * diff(p, q)); });
+        clash += (pick.f.score - lowest) / (3 * pk.pitch);
+        pk.place(photoAspect(p), pick.f, p);
         out.push(p);
       }
       return { out, clash };
@@ -738,15 +752,82 @@
     for (let k = 0; k < 8; k++) { const a = arrange(); if (!best || a.clash < best.clash) best = a; }
     return best.out.concat(rest);
   }
-  // About how many photos fit in one row of the collage at this screen width (same row height targets
-  // as setupMasonry in app.js).
-  function rowGuess(real) {
-    const vw = typeof window !== "undefined" && window.innerWidth ? window.innerWidth : 1280;
-    const gutter = vw >= 1100 ? 48 : vw >= 720 ? 32 : 16, W = Math.min(vw, 1280) - 2 * gutter;
-    const target = W < 560 ? 170 : W < 1000 ? 230 : 290;
-    const avg = real.reduce((s, p) => s + photoAspect(p), 0) / real.length;
-    return Math.max(2, Math.round(W / (target * avg)));
-  }
+
+  // The collage packer, shared by the mix above and the page layout (setupMasonry in app.js).
+  // The width is split into units: 3 per column of tall photos (4 columns on desktop, 3 on tablets,
+  // 2 on phones). Each photo keeps its true shape and gets about the same area, so a tall 3:4 photo
+  // spans 3 units (a quarter of a desktop row) and a wide 4:3 photo 4 units (a third); on phones wide
+  // photos take the full width. To stack neatly, a photo may be one unit wider or narrower than ideal,
+  // and it is never put where it would leave a gap too narrow for any photo to fill.
+  const COLLAGE = SITE.collage = {
+    units(W) {
+      const cols = Math.max(2, Math.min(4, Math.floor((W + 8) / ((W < 560 ? 140 : 220) + 8))));
+      return 3 * cols;
+    },
+    packer(W, gapX, gapY) {
+      const U = COLLAGE.units(W), pitch = (W + gapX) / U, MIN = 3;
+      const H = new Array(U).fill(0), owner = new Array(U).fill(null);
+      let memo = new Map();
+      const full = s => (s > U - MIN ? U : s);
+      const ideal = ar => full(Math.max(MIN, Math.round(3 * Math.sqrt(ar / 0.75))));
+      const options = ar => {
+        const i = ideal(ar), o = [i];
+        [i + 1, i - 1].forEach(s => { if (s >= MIN && s <= U && full(s) === s && !o.includes(s)) o.push(s); });
+        if (i < U && !o.includes(MIN) && ar < 1.2) o.push(MIN);
+        if (i === U && !o.includes(MIN)) o.push(MIN);
+        return o;
+      };
+      // A run of units next to [p, p+sp) that is lower than both its sides and too narrow to fill.
+      const sliver = (p, sp) => {
+        if (p > 0) {
+          let j = p - 1; const h = H[j];
+          while (j > 0 && Math.abs(H[j - 1] - h) < 0.5) j--;
+          if (p - j < MIN && (j === 0 || H[j - 1] > h)) return true;
+        }
+        if (p + sp < U) {
+          let j = p + sp; const h = H[j];
+          while (j < U - 1 && Math.abs(H[j + 1] - h) < 0.5) j++;
+          if (j - (p + sp) + 1 < MIN && (j === U - 1 || H[j + 1] > h)) return true;
+        }
+        return false;
+      };
+      // Best spot for a photo sp units wide: as high up as possible, little empty space under it, no slivers.
+      const best = sp => {
+        if (memo.has(sp)) return memo.get(sp);
+        let b = null;
+        for (let p = 0; p + sp <= U; p++) {
+          let top = 0, waste = 0;
+          for (let k = p; k < p + sp; k++) top = Math.max(top, H[k]);
+          for (let k = p; k < p + sp; k++) waste += top - H[k];
+          const score = top + 0.6 * waste / sp + (sliver(p, sp) ? 1e6 : 0);
+          if (!b || score < b.score - 1e-6) b = { p, sp, top, waste, score };
+        }
+        memo.set(sp, b);
+        return b;
+      };
+      return {
+        U, pitch,
+        fit(ar) {   // where this photo would go, and at which width
+          const i = ideal(ar);
+          let f = null;
+          for (const sp of options(ar)) {
+            const b = best(sp), score = b.score + Math.abs(sp - i) * pitch * 1.5;
+            if (!f || score < f.score - 1e-6) f = { ...b, score };
+          }
+          return f;
+        },
+        place(ar, f, tag) {   // put it there; returns the tile's position and size in px
+          const w = f.sp * pitch - gapX, h = w / ar;
+          for (let k = f.p; k < f.p + f.sp; k++) { H[k] = f.top + h + gapY; owner[k] = tag; }
+          memo = new Map();
+          return { x: f.p * pitch, y: f.top, w, h };
+        },
+        under(f) { return owner.slice(f.p, f.p + f.sp).filter(Boolean); },
+        around(f) { return new Set(owner.slice(Math.max(0, f.p - 1), f.p + f.sp + 1).filter(Boolean)); },
+        height() { return Math.max(0, Math.max.apply(null, H) - gapY); }
+      };
+    }
+  };
 
   V.photography = function () {
     SITE.photos = mixPhotos(SITE.photos);
