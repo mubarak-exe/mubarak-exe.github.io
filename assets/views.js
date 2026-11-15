@@ -665,6 +665,7 @@
     <h1 class="serif-title poem-title" id="poem-title" tabindex="-1">${esc(p.title)}</h1>
     <p class="poem-meta">${poemMeta(p)}</p>
     ${p.sample ? `<p class="poem-sample">Sample poem by ${esc(p.sample)}, public domain.</p>` : ""}
+    ${p.credit ? `<p class="poem-sample">${esc(p.credit)}</p>` : ""}
     <span class="poem-rule" aria-hidden="true"></span>
     <div class="poem-text">${p.stanzas.map(s => `<p>${esc(s)}</p>`).join("")}</div>
     <div class="poem-actions">${appreciateBtn(p.id)}<button class="appreciate" type="button" data-copy-link>${LINK_ICON}<span>Copy link</span></button></div>
