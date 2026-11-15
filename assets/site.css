@@ -204,7 +204,7 @@ kbd {
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
 /* ---------- Shared page pieces ---------- */
-.page-hero { padding-block: clamp(48px, 8vw, 120px) clamp(32px, 5vw, 64px); display: grid; gap: 22px; }
+.page-hero { padding-block: clamp(28px, 4vw, 56px) clamp(32px, 5vw, 64px); display: grid; gap: 22px; }
 .page-title { font-size: clamp(2.7rem, 7.6vw, 6.6rem); }
 .page-lede { font-size: clamp(1.1rem, 1.7vw, 1.35rem); color: var(--muted); max-width: 36em; }
 .section { padding-top: clamp(80px, 11vw, 150px); }
