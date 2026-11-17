@@ -330,6 +330,9 @@
               { title: "Optimize cuts", text: "Plan how glass is cut to reduce waste." },
               { title: "Procure", text: "Source the materials for the order." },
               { title: "Deliver", text: "Manage delivery to the project." }
+            ] },
+            { t: "links", items: [
+              { kicker: "Interactive demo", title: "IGU Constructor", text: "Construct an insulated glass unit in 3D, optimise how its panes are cut from stock sheets, and get a proforma invoice.", href: "/demos/igu-quote/" }
             ] }
           ]
         },
