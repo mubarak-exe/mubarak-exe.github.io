@@ -358,7 +358,7 @@
         <div><dt>Before</dt><dd>IT Consultant<span class="dd-sub">Glazingshopee, Mumbai</span></dd></div>
       </dl>
       <div class="actions"><a class="btn btn-primary" href="#work">See the work ${ARR}</a><a class="btn" href="#thinking">How I think ${ARR}</a></div>
-      <p class="learn-credit">Background: streets of San Francisco, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
+      <p class="learn-credit">Background: streets of San Francisco, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors<span data-taxi-when hidden>; taxis: real trips, <span data-taxi-label></span> (Cabspotting)</span></p>
     </div>
     <figure class="map-card" data-map="hero">
       <div class="map-head"><span class="map-live"><span class="live-dot"></span>Live demo network</span>

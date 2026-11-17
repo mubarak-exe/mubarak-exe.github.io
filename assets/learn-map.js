@@ -5,9 +5,12 @@
      2. Roads        - map matching: each ping slides onto the street it came from while the complete
                        street map draws itself in; the travelled streets stand out
      3. Travel times - a sweep passes; each travelled street thickens by how slow it is, a few show a
-                       travel time, then a few vehicles drive the map at those speeds
-   Trips, pings and speeds are synthetic: only the street geometry is real. If the streets can't load, a
-   synthetic city is used. No pointer interaction. Reduced motion: one still frame.
+                       travel time, then taxis drive the map
+   The taxis are REAL: 2-minute slices of 2008 San Francisco cab trips on busy Saturday evenings (Cabspotting,
+   map-matched to the same streets; built by scripts/build-sf-taxis.py into sf-taxis.js), replayed 12x faster,
+   each loop in the neighbourhood that was busiest at that moment. The pings, lit streets and travel-time
+   labels are illustrative. If the trips can't load, taxis wander the streets instead; if the streets can't
+   load, a synthetic city is used. No pointer interaction. Reduced motion: one still frame.
    SHOW_ON_LIVE keeps it off mubarak.sh until approved; it always runs in previews and local tests. */
 (function (g) {
   "use strict";
@@ -15,6 +18,9 @@
   const SHOW_ON_LIVE = true;   // approved by him on 2026-11-14
   const isLive = /(^|\.)mubarak\.sh$/i.test(location.hostname);
   const ROADS_SRC = "assets/sf-roads.js";
+  const TAXIS_SRC = "assets/sf-taxis.js";
+  const SPEEDUP = 12;   // real taxi time runs 12x faster than the animation clock
+  const TRAIL_S = 8;    // each taxi trails its last 8 real seconds of road
 
   // Timeline of one loop, in ms.
   const T = { pings: 200, match: 4200, learn: 6800, ride: 7600, fade: 15500, end: 17000 };
@@ -73,6 +79,46 @@
     }
     return roadsPromise;
   }
+  let taxisPromise = null;
+  function loadTaxis() {
+    if (SITE.sfTaxis) return Promise.resolve(SITE.sfTaxis);
+    if (!taxisPromise) {
+      taxisPromise = new Promise((resolve, reject) => {
+        const s = doc.createElement("script");
+        s.src = TAXIS_SRC;
+        s.onload = () => (SITE.sfTaxis ? resolve(SITE.sfTaxis) : reject(new Error("no taxis")));
+        s.onerror = () => reject(new Error("taxis failed to load"));
+        doc.head.appendChild(s);
+      });
+    }
+    return taxisPromise;
+  }
+  // Decode once: each trip slice as times (real seconds from the start of its moment) and points (metres).
+  function decodeTaxis(data) {
+    if (data._moments) return data._moments;
+    data._moments = data.moments.map(m => ({
+      label: m.label,
+      trips: m.trips.map(f => {
+        let t = f[0], x = f[1], y = f[2];
+        const ts = [t / 10], xs = [x], ys = [y];
+        for (let i = 3; i < f.length; i += 3) { t += f[i]; x += f[i + 1]; y += f[i + 2]; ts.push(t / 10); xs.push(x); ys.push(y); }
+        return { ts, xs, ys };
+      })
+    }));
+    return data._moments;
+  }
+  const SCALE = w => (w < 700 ? 0.42 : 0.34);   // pixels per metre
+  // The neighbourhood to show for a moment: one of the anchors where many of that moment's taxis drive.
+  function busyAnchor(data, moment, w, h) {
+    const [lonMin, latMin, , latMax] = data.bbox, lat0 = (latMin + latMax) / 2;
+    const mx = 111320 * Math.cos(lat0 * Math.PI / 180), my = 110540, s = SCALE(w), vw = w / s, vh = h / s;
+    const counts = ANCHORS.map(([lon, lat]) => {
+      const cx = (lon - lonMin) * mx, cy = (latMax - lat) * my;
+      return moment.trips.filter(tr => tr.xs.some((x, i) => Math.abs(x - cx) < vw / 2 && Math.abs(tr.ys[i] - cy) < vh / 2)).length;
+    });
+    const top = Math.max(...counts), good = ANCHORS.filter((a, i) => counts[i] >= 0.65 * top);
+    return good[Math.floor(Math.random() * good.length)];
+  }
   // Decode once: streets in metres from the north-west corner of the data's bounding box.
   function decode(data) {
     if (data._streets) return data._streets;
@@ -84,12 +130,13 @@
     });
     return data._streets;
   }
-  // The part of San Francisco that fits the hero, at s px per metre, centred on a random neighbourhood.
-  function makeCitySF(data, w, h) {
-    const streets = decode(data), s = w < 700 ? 0.42 : 0.34;
+  // The part of San Francisco that fits the hero, at s px per metre, centred on a neighbourhood
+  // (the given anchor, or a random one).
+  function makeCitySF(data, w, h, anchor) {
+    const streets = decode(data), s = SCALE(w);
     const [lonMin, latMin, lonMax, latMax] = data.bbox, lat0 = (latMin + latMax) / 2;
     const mx = 111320 * Math.cos(lat0 * Math.PI / 180), my = 110540;
-    const [alon, alat] = ANCHORS[Math.floor(Math.random() * ANCHORS.length)];
+    const [alon, alat] = anchor || ANCHORS[Math.floor(Math.random() * ANCHORS.length)];
     const vw = w / s, vh = h / s;
     let cx = (alon - lonMin) * mx + rand(-300, 300), cy = (latMax - alat) * my + rand(-300, 300);
     cx = vw >= data.w ? data.w / 2 : Math.max(vw / 2, Math.min(data.w - vw / 2, cx));
@@ -111,7 +158,28 @@
       nodes[a].adj.push({ e: edges.length - 1, to: b });
       nodes[b].adj.push({ e: edges.length - 1, to: a });
     }
-    return { nodes, edges, w, h };
+    return { nodes, edges, w, h, view: { x0, y0, s } };
+  }
+
+  // Real taxis for this view: every trip slice of the moment that passes through it, in screen pixels.
+  function realRiders(city, moment, windowS) {
+    const { x0, y0, s } = city.view, { w, h } = city, out = [];
+    for (const tr of moment.trips) {
+      const xs = tr.xs.map(x => (x - x0) * s), ys = tr.ys.map(y => (y - y0) * s);
+      if (!xs.some((x, i) => x > -40 && x < w + 40 && ys[i] > -40 && ys[i] < h + 40)) continue;
+      const n = tr.ts.length;
+      // Fade in only if the trip really starts inside the moment, out only if it really ends there.
+      out.push({ ts: tr.ts, xs, ys, k: 0, fadeIn: tr.ts[0] > -5, fadeOut: tr.ts[n - 1] < windowS + 5 });
+    }
+    return out;
+  }
+  // Position of a real taxi at real time rt (seconds); r.k remembers the segment, as time only moves forward.
+  function taxiAt(r, rt) {
+    const { ts, xs, ys } = r;
+    if (r.k > 0 && ts[r.k] > rt) r.k = 0;
+    while (r.k < ts.length - 2 && ts[r.k + 1] < rt) r.k++;
+    const i = r.k, f = clamp01((rt - ts[i]) / ((ts[i + 1] - ts[i]) || 1e-6));
+    return { x: xs[i] + (xs[i + 1] - xs[i]) * f, y: ys[i] + (ys[i + 1] - ys[i]) * f };
   }
 
   /* ---------------- Fallback: a synthetic city ---------------- */
@@ -254,6 +322,13 @@
     const reduceMQ = g.matchMedia("(prefers-reduced-motion: reduce)");
     const base = doc.createElement("canvas"), bctx = base.getContext("2d");   // the faint city, drawn once per city
     let w = 0, h = 0, dpr = 1, city = null, pings = [], riders = [], textRects = [], roads = null, dead = false;
+    let taxis = null, taxiWindow = 120;   // decoded real-trip moments, when they loaded
+    const when = shell.querySelector("[data-taxi-when]"), whenLabel = shell.querySelector("[data-taxi-label]");
+    function showWhen(label) {   // credit line: which real evening the taxis are from
+      if (!when || !whenLabel) return;
+      when.hidden = !label;
+      if (label) whenLabel.textContent = label;
+    }
     let raf = 0, last = 0, t = 0, onScreen = true, colorsAt = -1e9, step = -1, baseTone = "";
     let ink = [232, 238, 244], accent = [245, 165, 36], muted = [154, 170, 187];
 
@@ -327,11 +402,15 @@
       baseTone = muted.join(",");
     }
     function newCity() {
-      city = roads ? makeCitySF(roads, w, h) : makeCitySynthetic(w, h);
+      // Real taxis: a random busy Saturday-evening moment, shown in a neighbourhood where its taxis drive.
+      const moment = roads && taxis ? taxis[Math.floor(Math.random() * taxis.length)] : null;
+      if (moment) { showWhen(moment.label); measureText(); } else showWhen(null);
+      city = roads ? makeCitySF(roads, w, h, moment ? busyAnchor(roads, moment, w, h) : null) : makeCitySynthetic(w, h);
       pings = makeTrips(city);
       schedule(city, pings);
       pickLabels(city, textRects);
-      riders = makeRiders(city, w >= 1000 ? 14 : 6, textRects);
+      city.real = !!(moment && city.view);
+      riders = city.real ? realRiders(city, moment, taxiWindow) : makeRiders(city, w >= 1000 ? 14 : 6, textRects);
       readColors();
       drawBase();
     }
@@ -418,8 +497,33 @@
         ctx.fillStyle = rgba(muted, 0.9 * a * master);
         ctx.fillText(e.label, e.mid.x, e.mid.y - 6);
       }
-      // Vehicles driving at the learned speeds (the only touch of amber).
-      if (!still && now > T.ride) {
+      // Taxis (the only touch of amber). Real trips: each taxi is where it really was at that moment of the
+      // evening, with a faint trail of the road it just drove.
+      if (!still && now > T.ride && city.real) {
+        const rt = ((now - T.ride) / 1000) * SPEEDUP, base = 0.9 * clamp01((now - T.ride) / 400) * master;
+        ctx.fillStyle = rgba(accent, 1);
+        ctx.strokeStyle = rgba(accent, 1);
+        ctx.lineWidth = 1.6;
+        for (const r of riders) {
+          const n = r.ts.length;
+          if (rt < r.ts[0] || rt > r.ts[n - 1]) continue;
+          let a = base;
+          if (r.fadeIn) a *= clamp01((rt - r.ts[0]) / 2);
+          if (r.fadeOut) a *= clamp01((r.ts[n - 1] - rt) / 2);
+          if (a <= 0.01) continue;
+          const p = taxiAt(r, rt), from = Math.max(r.ts[0], rt - TRAIL_S);
+          ctx.globalAlpha = a * 0.32;
+          ctx.beginPath();
+          const q = taxiAt({ ts: r.ts, xs: r.xs, ys: r.ys, k: 0 }, from);
+          ctx.moveTo(q.x, q.y);
+          for (let i = 0; i < n; i++) if (r.ts[i] > from && r.ts[i] < rt) ctx.lineTo(r.xs[i], r.ys[i]);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+          ctx.globalAlpha = a;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      } else if (!still && now > T.ride) {   // fallback: taxis wander the streets at the learned speeds
         ctx.fillStyle = rgba(accent, 0.9 * clamp01((now - T.ride) / 400) * master);
         for (const r of riders) {
           const e = city.edges[r.e], p = at(e.pts, e.d, r.forward ? r.s : e.len - r.s);
@@ -437,7 +541,7 @@
       if (ts - colorsAt > 1000) { readColors(); colorsAt = ts; }
       t += dt;
       if (t >= T.end) { newCity(); t = 0; }
-      if (t > T.ride) riders.forEach(r => advance(city, r, dt));
+      if (t > T.ride && !city.real) riders.forEach(r => advance(city, r, dt));
       setStep(t >= T.fade ? -1 : t >= STEP_AT[2] ? 2 : t >= STEP_AT[1] ? 1 : t >= STEP_AT[0] ? 0 : -1);
       draw(t, false);
       raf = g.requestAnimationFrame(frame);
@@ -464,7 +568,9 @@
     }
 
     measure();
-    loadRoads().then(start, () => start(null));
+    // Streets first; the real taxi trips are fetched with them (the taxis wander instead if they fail).
+    loadRoads().then(data => loadTaxis().then(td => { taxis = decodeTaxis(td); taxiWindow = td.windowS || 120; }, () => {})
+      .then(() => start(data)), () => start(null));
     const ro = "ResizeObserver" in g ? new ResizeObserver(() => { measure(); if (reduceMQ.matches) still(); }) : null;
     if (ro) ro.observe(shell);
     const io = "IntersectionObserver" in g ? new IntersectionObserver(es => { onScreen = es[0].isIntersecting; if (!reduceMQ.matches) render(); }) : null;
