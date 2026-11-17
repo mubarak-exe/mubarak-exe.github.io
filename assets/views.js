@@ -309,21 +309,24 @@
   /* ------------------------------------------------------------------ */
   /* Shared cards                                                        */
   /* ------------------------------------------------------------------ */
+  // A project with a demo opens the demo (a separate page on mubarak.sh/demos/) instead of a case study.
+  const projHref = p => esc(p.demo || "#" + p.id);
+  SITE.projHref = projHref;
   function workRow(p) {
     const i = SITE.projects.indexOf(p);
-    return `<a class="work-row rv" href="#${p.id}" data-type="${p.type}" data-id="${p.id}">
+    return `<a class="work-row rv" href="${projHref(p)}" data-type="${p.type}" data-id="${p.id}">
       <span class="work-idx">${pad2(i + 1)}</span>
       <span class="work-cover">${cover(p.cover, p.seed)}</span>
       <span class="work-body">
         <span class="work-meta"><span>${p.type}</span><span>${p.tagline}</span><span>${p.years}</span></span>
         <h3 class="work-title">${p.title}</h3>
         <span class="work-hook">${p.hook}</span>
-        <span class="work-foot"><span class="work-metric"><strong>${p.metric.value}</strong><small>${p.metric.label}</small></span><span class="work-cta">${p.role} · Case study ${ARR}</span></span>
+        <span class="work-foot"><span class="work-metric"><strong>${p.metric.value}</strong><small>${p.metric.label}</small></span><span class="work-cta">${p.role} · ${p.demo ? "Try the demo" : "Case study"} ${ARR}</span></span>
       </span>
     </a>`;
   }
   function miniCard(p) {
-    return `<a class="mini-card rv" href="#${p.id}"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="work-meta"><span>${p.type}</span><span>${p.years}</span></span><span class="mini-card-title">${p.title}</span></a>`;
+    return `<a class="mini-card rv" href="${projHref(p)}"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="work-meta"><span>${p.type}</span><span>${p.years}</span></span><span class="mini-card-title">${p.title}</span></a>`;
   }
   function noteCard(n) {
     const i = SITE.notes.indexOf(n);
@@ -452,8 +455,8 @@
     </div>
   </div>
   <nav class="wrap pager" aria-label="More projects">
-    <a href="#${prev.id}"><span class="pager-dir">← Previous</span><span class="pager-name">${prev.title}</span></a>
-    <a class="next" href="#${next.id}"><span class="pager-dir">Next →</span><span class="pager-name">${next.title}</span></a>
+    <a href="${projHref(prev)}"><span class="pager-dir">← Previous</span><span class="pager-name">${prev.title}</span></a>
+    <a class="next" href="${projHref(next)}"><span class="pager-dir">Next →</span><span class="pager-name">${next.title}</span></a>
   </nav>
   <section class="wrap related" aria-labelledby="related-title">
     <div class="section-head"><div><p class="kicker dash">Keep reading</p><h2 class="display section-title" id="related-title">Related work.</h2></div></div>
@@ -632,7 +635,7 @@
     ${sectionIndex(n.sections, "In this note")}
     <div class="prose">${sectionsHTML(n.sections)}</div>
   </div>
-  ${p ? `<div class="wrap from-project"><a href="#${p.id}" class="rv"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="from-project-body"><span class="kicker">From the project</span><span class="mini-card-title">${p.title}</span><span class="work-hook">${p.hook}</span><span class="work-cta">Read the case study ${ARR}</span></span></a></div>` : ""}
+  ${p ? `<div class="wrap from-project"><a href="${projHref(p)}" class="rv"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="from-project-body"><span class="kicker">From the project</span><span class="mini-card-title">${p.title}</span><span class="work-hook">${p.hook}</span><span class="work-cta">Read the case study ${ARR}</span></span></a></div>` : ""}
   <nav class="wrap pager" aria-label="More notes">
     <a href="#${prev.id}"><span class="pager-dir">← Previous note</span><span class="pager-name">${prev.title}</span></a>
     <a class="next" href="#${next.id}"><span class="pager-dir">Next note →</span><span class="pager-name">${next.title}</span></a>

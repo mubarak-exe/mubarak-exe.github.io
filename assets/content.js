@@ -306,6 +306,7 @@
       cover: "facade",
       seed: 3,
       featured: true,
+      demo: "/demos/igu-quote/",   // the card opens the demo (separate page) instead of a case study
       hook: "FacadeMart, Buyglass24 and EdFacade: web products that took glass façade quotations from weeks to minutes.",
       thesis: "Three web products that turned a fragmented, weeks-long quotation process into one workflow that takes minutes.",
       metric: { value: "Weeks → minutes", label: "quotation time" },
@@ -330,9 +331,6 @@
               { title: "Optimize cuts", text: "Plan how glass is cut to reduce waste." },
               { title: "Procure", text: "Source the materials for the order." },
               { title: "Deliver", text: "Manage delivery to the project." }
-            ] },
-            { t: "links", items: [
-              { kicker: "Interactive demo", title: "IGU Constructor", text: "Construct an insulated glass unit in 3D, optimise how its panes are cut from stock sheets, and get a proforma invoice.", href: "/demos/igu-quote/" }
             ] }
           ]
         },
@@ -679,7 +677,7 @@
     { when: "Sep 2024 – Apr 2026", type: "Education", role: "Master of Applied Computing", org: "Wilfrid Laurier University, Waterloo",
       facts: ["GPA 10.75/12", "Award for Outstanding Graduate Work, Class of 2026", "Thesis: <a href=\"https://scholars.wlu.ca/etd/2908/\" target=\"_blank\" rel=\"noopener\">Intelligent Digital Twin System for Urban Mobility</a>"] },
     { when: "Jun 2022 – Jun 2024", type: "Work", role: "IT Consultant", org: "Glazingshopee, Mumbai",
-      text: "Led product development for FacadeMart, Buyglass24 and EdFacade, and coordinated a 5-person cross-functional team. <a href=\"#glazingshopee\">Read the case study</a>." },
+      text: "Led product development for FacadeMart, Buyglass24 and EdFacade, and coordinated a 5-person cross-functional team. <a href=\"/demos/igu-quote/\">Try the demo</a>." },
     { when: "Jul 2018 – May 2022", type: "Education", role: "B.Tech. in Computer Science and Engineering", org: "Sanjay Ghodawat University, Kolhapur",
       facts: ["GPA 8.29/10", "SGU Best Project Award (2021–22) for <a href=\"#fake-news\">fake news detection</a>"] }
   ];

@@ -43,7 +43,9 @@
   function focusHeading() { const h = main.querySelector("h1"); if (h) h.focus({ preventScroll: true }); }
 
   function route() {
-    let r = resolve(hashKey());
+    const want = hashKey();
+    if (PROJECTS[want] && PROJECTS[want].demo) { location.replace(PROJECTS[want].demo); return; }   // projects with a demo open it
+    let r = resolve(want);
     if (!r) { if (!first) return; r = resolve("home"); }
     if (r.key === currentKey) return;
     currentKey = r.key;
