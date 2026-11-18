@@ -18,7 +18,7 @@
   const SHOW_ON_LIVE = true;   // approved by him on 2026-11-14
   const isLive = /(^|\.)mubarak\.sh$/i.test(location.hostname);
   const ROADS_SRC = "assets/sf-roads.js";
-  const TAXIS_SRC = "assets/sf-taxis.js";
+  const TAXIS_SRC = "assets/sf-taxis.js?v=2";   // bump ?v= when sf-taxis.js changes (it is cached for hours)
   const SPEEDUP = 12;   // real taxi time runs 12x faster than the animation clock
   const TRAIL_S = 8;    // each taxi trails its last 8 real seconds of road
 
