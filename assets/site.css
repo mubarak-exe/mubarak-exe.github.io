@@ -1265,3 +1265,15 @@ main.fade-in { animation: vt-in 0.5s var(--ease) both; }
 .work-metric strong { font-size: 1.12rem; }
 .work-metric small { font-size: 1rem; }
 .work-row .work-cta { font-size: 1rem; }
+/* Projects with a demo: "Try the demo" is a filled button in the card's top-right corner (2026-11-18) */
+.work-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.work-row .work-foot { align-items: center; }
+.demo-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 999px; background: var(--accent);
+  color: var(--accent-ink); font-weight: 700; font-size: 1rem; line-height: 1.2;
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--accent) 90%, transparent); transition: filter .2s, transform .2s var(--ease); }
+.work-row:hover .demo-btn { filter: brightness(1.08); transform: translateY(-1px); }
+@media (max-width: 879px) {   /* cover on top: the button sits in the card's top-right corner, over the cover */
+  .work-row { position: relative; }
+  .work-row .demo-btn { position: absolute; top: 28px; right: 28px; z-index: 1; padding: 7px 14px; font-size: 0.92rem; }
+}
+.mini-demo { margin-top: 2px; font-size: 0.86rem; font-weight: 700; color: var(--accent); display: inline-flex; gap: 6px; align-items: center; }

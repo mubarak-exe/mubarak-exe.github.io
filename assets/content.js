@@ -121,7 +121,6 @@
           blocks: [
             { t: "p", text: "LinkETA became the travel-time engine inside DTUMOS, an open-source digital twin for urban mobility, and part of my master's thesis." },
             { t: "links", items: [
-              { kicker: "Project", title: "DTUMOS digital twin", text: "LinkETA powers its traffic-aware ETAs.", view: "dtumos" },
               { kicker: "Paper", title: "LinkETA: A Multi-Relational Graph Transformer for Link-Level Travel Time Estimation", text: "SSRN", href: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7379984" },
               { kicker: "Thesis", title: "Intelligent Digital Twin System for Urban Mobility", text: "Wilfrid Laurier University, 2026", href: "https://scholars.wlu.ca/etd/2908/" }
             ] }
@@ -136,7 +135,7 @@
         { term: "MAML", def: "Model-Agnostic Meta-Learning. Trains model weights that adapt to a new task in a few steps." },
         { term: "Reptile", def: "A simpler meta-learning method from OpenAI with the same goal as MAML and lower computational cost." }
       ],
-      related: ["dtumos", "text2simulation", "dementia-review"]
+      related: ["text2simulation", "dementia-review", "glazingshopee"]
     },
 
     {
@@ -166,7 +165,7 @@
         {
           id: "problem", title: "Powerful, but hard to set up",
           blocks: [
-            { t: "p", text: "<a href=\"#dtumos\">DTUMOS</a> can simulate a lot, but setting up a scenario means knowing its configuration options. That limits who can use it. A natural-language interface removes the barrier: describe the scenario and let an agent write the configuration." }
+            { t: "p", text: "DTUMOS, an open-source digital twin for urban mobility, can simulate a lot, but setting up a scenario means knowing its configuration options. That limits who can use it. A natural-language interface removes the barrier: describe the scenario and let an agent write the configuration." }
           ]
         },
         {
@@ -218,78 +217,7 @@
         { term: "GPT-4o", def: "OpenAI's multimodal large language model, used here to interpret requests." },
         { term: "False alarm", def: "A supported request that the verifier wrongly blocks." }
       ],
-      related: ["dtumos", "linketa", "dementia-review"]
-    },
-
-    {
-      id: "dtumos",
-      title: "DTUMOS",
-      titleLines: ["DTUMOS"],
-      type: "Systems",
-      tagline: "Digital twin",
-      tags: ["digital twin", "simulation", "dispatch", "MIP", "OR-Tools", "open source", "taxi"],
-      years: "2025–now",
-      when: "April 2025 – present",
-      role: "Contributor",
-      org: "SPIN Lab, with CAMUS Lab, Gachon University (South Korea)",
-      tools: ["Python", "Mixed-Integer Programming", "Google OR-Tools", "LinkETA"],
-      cover: "dispatch",
-      seed: 13,
-      featured: true,
-      hook: "An open-source digital twin for urban mobility. I added traffic-aware ETAs and helped build its minute-by-minute taxi dispatch.",
-      thesis: "A city you can test on: an open-source digital twin with traffic-aware travel times and a dispatch engine that scales to any fleet size.",
-      metric: { value: "Any", label: "fleet size the dispatch simulation scales to" },
-      outcomes: [
-        { value: "1 min", label: "dispatch time step" },
-        { value: "Any", label: "fleet size the simulation scales to" },
-        { value: "MIP", label: "matching, solved with Google OR-Tools" }
-      ],
-      sections: [
-        {
-          id: "context", title: "A city you can test on",
-          blocks: [
-            { t: "p", text: "DTUMOS stands for Digital Twin for Urban Mobility Operating System. It is an open-source platform that simulates mobility services in a city, developed in partnership with CAMUS Lab at Gachon University in South Korea." },
-            { t: "p", text: "For a taxi simulation, two parts matter most: how long trips take, and how taxis are matched to passengers. My work focused on both." }
-          ]
-        },
-        {
-          id: "dispatch", title: "Matching taxis to passengers, minute by minute",
-          blocks: [
-            { t: "p", text: "I helped develop a dispatch simulation that runs in one-minute steps. Each minute, new ride requests arrive, and the engine decides which available taxi should serve which passenger." },
-            { t: "p", text: "The matching is solved as a Mixed-Integer Programming problem with Google's OR-Tools, and the simulation scales to any fleet size." },
-            { t: "demo", kind: "dispatch", title: "Run a small dispatch simulation", note: "Change the fleet size and demand and watch waiting times respond. <strong>Simplified demo:</strong> it matches with a greedy nearest-taxi rule on a grid. The DTUMOS engine solves the matching with Mixed-Integer Programming." }
-          ]
-        },
-        {
-          id: "travel-time", title: "Traffic-aware ETAs from LinkETA",
-          blocks: [
-            { t: "p", text: "I integrated <a href=\"#linketa\">LinkETA</a> into DTUMOS so simulated trips use traffic-driven travel time predictions. This moves the platform toward an intelligent transportation system." },
-            { t: "flow", label: "Simulation loop", steps: [
-              { title: "Requests", text: "Ride requests arrive each simulated minute." },
-              { title: "Dispatch", text: "Taxis are matched to passengers with MIP in OR-Tools." },
-              { title: "Travel time", text: "LinkETA predicts how long each trip will take in current traffic." },
-              { title: "City state", text: "Taxis move, passengers are served, and the next minute begins." }
-            ] }
-          ]
-        },
-        {
-          id: "next", title: "Built on top",
-          blocks: [
-            { t: "p", text: "With the simulation in place, the next question was who can use it. Text2Simulation adds a natural-language interface, so a scenario can be described in plain words instead of configured by hand." },
-            { t: "links", items: [
-              { kicker: "Project", title: "Text2Simulation", text: "An LLM agent that configures DTUMOS from plain language.", view: "text2simulation" },
-              { kicker: "Thesis", title: "Intelligent Digital Twin System for Urban Mobility", text: "Wilfrid Laurier University, 2026", href: "https://scholars.wlu.ca/etd/2908/" }
-            ] }
-          ]
-        }
-      ],
-      glossary: [
-        { term: "Digital twin", def: "A software model of a real system, used to test changes before making them in the real world." },
-        { term: "Dispatch", def: "Deciding which vehicle serves which ride request." },
-        { term: "Mixed-Integer Programming", def: "An optimization method where some decisions must be whole numbers, such as assigning a taxi (1) or not (0)." },
-        { term: "OR-Tools", def: "Google's open-source library for optimization problems such as routing and assignment." }
-      ],
-      related: ["linketa", "text2simulation", "glazingshopee"]
+      related: ["linketa", "dementia-review", "glazingshopee"]
     },
 
     {
@@ -361,7 +289,7 @@
         { term: "Cut optimization", def: "Planning how to cut glass sheets so the required pieces use as little material as possible." },
         { term: "SRS and FRS", def: "Software and Functional Requirements Specifications: documents that define what a system must do." }
       ],
-      related: ["dtumos", "linketa", "fake-news"]
+      related: ["linketa", "text2simulation", "fake-news"]
     },
 
     {
@@ -583,7 +511,7 @@
           { t: "p", text: "Links don't behave independently. Congestion on one segment backs up into the segments that feed it, while a side street next to a jammed arterial can stay clear. LinkETA treats the road network as a graph with more than one kind of relationship between segments, and uses a Graph Transformer so each prediction can draw on the segments around it." }
         ] },
         { id: "result", title: "What it bought", blocks: [
-          { t: "p", text: "On average, LinkETA had 23.7% lower error than Baidu's DuETA and 17.6% lower error than Uber's DeeprETA, while keeping prediction latency low. Its link-level predictions now feed the <a href=\"#dtumos\">DTUMOS</a> digital twin." }
+          { t: "p", text: "On average, LinkETA had 23.7% lower error than Baidu's DuETA and 17.6% lower error than Uber's DeeprETA, while keeping prediction latency low. Its link-level predictions now feed the DTUMOS digital twin." }
         ] }
       ]
     },
@@ -672,7 +600,7 @@
 
   SITE.timeline = [
     { when: "Jan 2025 – present", type: "Work", role: "Research Assistant", org: "SPIN Lab, Wilfrid Laurier University, Waterloo",
-      text: "Travel-time estimation and digital twins for urban mobility: <a href=\"#linketa\">LinkETA</a>, <a href=\"#dtumos\">DTUMOS</a>, <a href=\"#text2simulation\">Text2Simulation</a>, and a <a href=\"#dementia-review\">systematic review</a> with SQUAD Lab." },
+      text: "Travel-time estimation and digital twins for urban mobility: <a href=\"#linketa\">LinkETA</a>, DTUMOS, <a href=\"#text2simulation\">Text2Simulation</a>, and a <a href=\"#dementia-review\">systematic review</a> with SQUAD Lab." },
     { when: "Jan 2025 – Apr 2026", type: "Teaching", role: "Graduate Teaching Assistant", org: "Wilfrid Laurier University, Waterloo",
       text: "CP421 Data Mining (MapReduce, clustering, recommender systems) and CP476 Internet Computing (web development). Managed student groups, graded assignments, projects and presentations, and proctored exams." },
     { when: "Sep 2024 – Apr 2026", type: "Education", role: "Master of Applied Computing", org: "Wilfrid Laurier University, Waterloo",

@@ -318,15 +318,16 @@
       <span class="work-idx">${pad2(i + 1)}</span>
       <span class="work-cover">${cover(p.cover, p.seed)}</span>
       <span class="work-body">
-        <span class="work-meta"><span>${p.type}</span><span>${p.tagline}</span><span>${p.years}</span></span>
+        <span class="work-top"><span class="work-meta"><span>${p.type}</span><span>${p.tagline}</span><span>${p.years}</span></span>${p.demo
+          ? `<span class="demo-btn">Try the demo ${ARR}</span>` : ""}</span>
         <h3 class="work-title">${p.title}</h3>
         <span class="work-hook">${p.hook}</span>
-        <span class="work-foot"><span class="work-metric"><strong>${p.metric.value}</strong><small>${p.metric.label}</small></span><span class="work-cta">${p.role} · ${p.demo ? "Try the demo" : "Case study"} ${ARR}</span></span>
+        <span class="work-foot"><span class="work-metric"><strong>${p.metric.value}</strong><small>${p.metric.label}</small></span><span class="work-cta">${p.role}</span></span>
       </span>
     </a>`;
   }
   function miniCard(p) {
-    return `<a class="mini-card rv" href="${projHref(p)}"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="work-meta"><span>${p.type}</span><span>${p.years}</span></span><span class="mini-card-title">${p.title}</span></a>`;
+    return `<a class="mini-card rv" href="${projHref(p)}"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="work-meta"><span>${p.type}</span><span>${p.years}</span></span><span class="mini-card-title">${p.title}</span>${p.demo ? `<span class="mini-demo">Try the demo ${ARR}</span>` : ""}</a>`;
   }
   function noteCard(n) {
     const i = SITE.notes.indexOf(n);
