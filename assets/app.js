@@ -87,7 +87,7 @@
     safe(setupArticle);
     safe(setupAppreciate);
     if (r.view === "photography") safe(setupViewer);
-    if (r.view === "home") safe(() => { const card = main.querySelector('[data-map="hero"]'); if (card) instances.push(D.mountHeroMap(card)); });
+    if (r.view === "home") safe(() => { const card = main.querySelector('[data-map="linketa"]'); if (card) instances.push(mountLinketaEmbed(card)); });
     if (r.view === "home" && SITE.learnMap) safe(() => { const shell = main.querySelector("[data-learn-hero]"); if (shell) instances.push(SITE.learnMap.mount(shell)); });
     main.querySelectorAll('[data-demo="route"]').forEach(el => safe(() => instances.push(D.mountRouteDemo(el))));
     main.querySelectorAll('[data-demo="dispatch"]').forEach(el => safe(() => instances.push(D.mountDispatch(el))));
@@ -251,6 +251,24 @@
     ioMap.observe(map);
     ioList.observe(list);
     cleanups.push(() => { ioMap.disconnect(); ioList.disconnect(); });
+  }
+
+  // Home page panel: the LinkETA demo (mubarak.sh/demos/linketa/embed.html) in a frame. It loads only after the page
+  // has settled, so the first paint and the hero animation are not slowed by the map and model.
+  function mountLinketaEmbed(card) {
+    const box = card.querySelector("[data-linketa-embed]");
+    let dead = false, timer = 0;
+    const add = () => {
+      if (dead || !box || box.querySelector("iframe")) return;
+      const f = document.createElement("iframe");
+      f.src = "/demos/linketa/embed.html";
+      f.title = "LinkETA travel time demo: click the map to set A, then B";
+      f.addEventListener("load", () => box.classList.add("ready"));
+      box.appendChild(f);
+    };
+    const later = () => { timer = setTimeout(() => ("requestIdleCallback" in window ? requestIdleCallback(add, { timeout: 2500 }) : add()), 600); };
+    if (document.readyState === "complete") later(); else window.addEventListener("load", later, { once: true });
+    return { destroy() { dead = true; clearTimeout(timer); } };
   }
 
   // Dashboard tiles: tap one to flip it and see the tests behind that check; tap again to flip back.

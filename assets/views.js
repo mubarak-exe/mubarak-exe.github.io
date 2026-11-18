@@ -363,17 +363,12 @@
       <div class="actions"><a class="btn btn-primary" href="#work">See the work ${ARR}</a><a class="btn" href="#thinking">How I think ${ARR}</a></div>
       <p class="learn-credit">Background: streets of San Francisco, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors<span data-taxi-when hidden>; taxis: real trips, <span data-taxi-label></span> (Cabspotting)</span></p>
     </div>
-    <figure class="map-card" data-map="hero">
-      <div class="map-head"><span class="map-live"><span class="live-dot"></span>Live demo network</span>
-        <ul class="legend" aria-label="Legend"><li><i class="sw sw-free"></i>Free flow</li><li><i class="sw sw-slow"></i>Slow</li><li><i class="sw sw-jam"></i>Congested</li></ul></div>
-      <div class="map-cities" role="group" aria-label="Choose a city">${[["sf", "San Francisco"], ["porto", "Porto"], ["chengdu", "Chengdu"], ["shanghai", "Shanghai"], ["annarbor", "Ann Arbor"], ["daegu", "Daegu"]].map(([k, n], i) => `<button class="chip-btn" type="button" data-city="${k}" aria-pressed="${i === 0}">${n}</button>`).join("")}</div>
-      <div class="map-canvas"><canvas role="img" aria-label="Animated road network. Roads change color with traffic through the day, and the fastest route from A to B is highlighted. Click two intersections to set a new trip."></canvas></div>
-      <div class="map-foot">
-        <div><span class="mf-label">Clock</span><span class="mf-value" data-rn="clock">07:30</span></div>
-        <div><span class="mf-label">ETA A → B</span><span class="mf-value" data-rn="eta">–</span></div>
-        <div><span class="mf-label">Segments</span><span class="mf-value" data-rn="links">–</span></div>
-      </div>
-      <figcaption class="map-hint">Click any two intersections to plan a trip. The clock runs through a full day, so you can watch rush hour build and clear. Synthetic network, for illustration.</figcaption>
+    <figure class="map-card" data-map="linketa">
+      <div class="map-head"><span class="map-live"><span class="live-dot"></span>LinkETA · live demo</span>
+        <ul class="legend" aria-label="Legend"><li><i class="sw sw-free"></i>Free flow</li><li><i class="sw sw-slow"></i>Slow</li><li><i class="sw sw-jam"></i>Busy</li></ul></div>
+      <div class="map-embed" data-linketa-embed><p class="map-embed-wait">Loading the LinkETA demo…</p></div>
+      <figcaption class="map-hint">The trained LinkETA model estimates a San Francisco trip road by road, right in your browser. <a href="/demos/linketa/">Open the full demo ${ARR}</a>
+        <span class="map-credit">Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, tiles by OpenFreeMap.</span></figcaption>
     </figure>
   </div>
 </section>
