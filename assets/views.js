@@ -168,8 +168,65 @@
     return s + "</svg>";
   }
 
+  // MetaETA: a new city where only a few recorded trips are known (bright), and every road gets an estimate (thin colours)
+  function coverFewShot(seed) {
+    const r = seeded(seed), cols = 10, rows = 6, pad = 54;
+    const cw = (800 - pad * 2) / (cols - 1), ch = (500 - pad * 2) / (rows - 1);
+    const N = [];
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) N.push([pad + x * cw + (r() - 0.5) * cw * 0.35, pad + y * ch + (r() - 0.5) * ch * 0.35]);
+    let roads = "", est = "";
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const i = y * cols + x;
+      [[x < cols - 1, i + 1], [y < rows - 1, i + cols]].forEach(([ok, j]) => {
+        if (!ok || r() < 0.08) return;
+        roads += ln(N[i], N[j], "cv-road", 9);
+        const v = r();
+        est += ln(N[i], N[j], v < 0.6 ? "cv-free" : v < 0.85 ? "cv-slow" : "cv-jam", 2.2);
+      });
+    }
+    let trips = "";
+    for (let k = 0; k < 3; k++) {              // three recorded trips, each a monotone walk across the grid
+      let x = Math.floor(r() * 3), y = Math.floor(r() * rows);
+      const pts = [N[y * cols + x]], dy = y < rows / 2 ? 1 : -1;
+      for (let s = 0; s < 8 && x < cols - 1; s++) {
+        if (r() < 0.65 || y + dy < 0 || y + dy >= rows) x++; else y += dy;
+        pts.push(N[y * cols + x]);
+      }
+      const d = "M" + pts.map(p => f1(p[0]) + " " + f1(p[1])).join(" L");
+      trips += `<path d="${d}" class="cv-route-case" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>` +
+        `<path d="${d}" class="cv-route" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    return svgOpen() + roads + est + trips + '<text class="cv-label" x="54" y="34">25 TRIPS → EVERY ROAD</text></svg>';
+  }
+
+  // Multimodal ETA: a bus line with stops, then a taxi leg to the destination
+  function coverTransit() {
+    const step = 64, x0 = 48, y0 = 42, cols = 11, rows = 6;
+    let s = svgOpen();
+    for (let i = 0; i <= cols; i++) s += ln([x0 + i * step, y0], [x0 + i * step, y0 + rows * step], "cv-road", 4);
+    for (let j = 0; j <= rows; j++) s += ln([x0, y0 + j * step], [x0 + cols * step, y0 + j * step], "cv-road", 4);
+    const P = (c, rr) => [x0 + c * step, y0 + rr * step];
+    const bus = [P(0, 5), P(2, 5), P(2, 3), P(5, 3), P(5, 2), P(8, 2)];
+    const d = "M" + bus.map(p => p.join(" ")).join(" L");
+    s += `<path d="${d}" class="cv-route-case" stroke-width="16" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s += `<path d="${d}" class="cv-route" stroke-width="7" fill="none" stroke-linejoin="round" stroke-linecap="round"/>`;
+    [P(1, 5), P(2, 4), P(3.5, 3), P(5, 2.5), P(6.5, 2), P(8, 2)].forEach(p => {
+      s += `<circle class="cv-pax-ring" cx="${f1(p[0])}" cy="${f1(p[1])}" r="12" stroke-width="2.5"/><circle class="cv-pax" cx="${f1(p[0])}" cy="${f1(p[1])}" r="5.5"/>`;
+    });
+    const B = P(10, 0);
+    s += `<path d="M${P(8, 2).join(" ")} L${P(10, 2).join(" ")} L${B.join(" ")}" class="cv-link" stroke-width="4" stroke-dasharray="9 8" fill="none" stroke-linejoin="round"/>`;
+    s += `<rect class="cv-taxi" x="${P(9, 2)[0] - 9}" y="${P(9, 2)[1] - 9}" width="18" height="18" rx="4"/>`;
+    const A = P(0, 5);
+    s += `<circle class="cv-pin" cx="${A[0]}" cy="${A[1]}" r="15"/><text class="cv-pin-t" x="${A[0]}" y="${A[1] + 5}" text-anchor="middle">A</text>`;
+    s += `<circle class="cv-pin" cx="${B[0]}" cy="${B[1]}" r="15"/><text class="cv-pin-t" x="${B[0]}" y="${B[1] + 5}" text-anchor="middle">B</text>`;
+    s += `<text class="cv-label" x="${P(2.6, 5)[0]}" y="${P(2.6, 5)[1] + 34}">BUS</text><text class="cv-label" x="${P(9.2, 2)[0]}" y="${P(9.2, 2)[1] + 34}">TAXI</text>`;
+    return s + "</svg>";
+  }
+
   function cover(kind, seed) {
     switch (kind) {
+      case "fewshot": return coverFewShot(seed);
+      case "transit": return coverTransit();
       case "network": return coverNetwork(seed);
       case "dispatch": return coverDispatch(seed);
       case "agent": return coverAgent(seed);
@@ -654,7 +711,7 @@
     <dl>
       <div><dt>Based in</dt><dd>${P.location}<br><span class="mono-sm">${P.coords}</span></dd></div>
       <div><dt>Now</dt><dd>Research Assistant<span class="dd-sub">SPIN Lab, Wilfrid Laurier University</span></dd></div>
-      <div><dt>Focus</dt><dd>Travel-time estimation, digital twins, LLM agents</dd></div>
+      <div><dt>Focus</dt><dd>Travel-time estimation, meta-learning, digital twins, LLM agents</dd></div>
       <div><dt>Open to</dt><dd>Machine learning and research roles in Canada</dd></div>
     </dl>
     <div class="card-actions">
@@ -671,6 +728,11 @@
   </div>
 </section>
 
+<section class="wrap about-block" aria-labelledby="teach-title">
+  <div class="section-head"><div><p class="kicker dash">Teaching</p><h2 class="display section-title" id="teach-title">Teaching assistant roles.</h2></div></div>
+  <div class="teach">${SITE.teaching.map(t => `<article class="teach-card rv"><p class="teach-when">${t.when}</p><h3 class="teach-course">${t.course}</h3><p class="teach-role">${t.role}, Wilfrid Laurier University</p><p class="teach-count"><strong>${t.count}</strong> ${t.unit}</p><p class="teach-text">${t.text}</p></article>`).join("")}</div>
+</section>
+
 <section class="wrap about-block" aria-labelledby="awards-title">
   <div class="section-head"><div><p class="kicker dash">Recognition</p><h2 class="display section-title" id="awards-title">Awards and funding.</h2></div></div>
   <div class="awards">${SITE.awards.map(a => `<div class="award rv"><span class="award-value" data-count>${a.value}</span><div><p class="award-title">${a.title}</p><p class="award-text">${a.text}</p></div></div>`).join("")}</div>
@@ -678,12 +740,26 @@
 
 <section class="wrap about-block" aria-labelledby="pubs-title">
   <div class="section-head"><div><p class="kicker dash">Publications</p><h2 class="display section-title" id="pubs-title">Papers and thesis.</h2></div></div>
-  <ul class="pubs">${SITE.publications.map(p => `<li class="rv">${p.href ? `<a class="pub-title" href="${esc(p.href)}" target="_blank" rel="noopener">${p.title} ${EXT}</a>` : `<span class="pub-title">${p.title}</span>`}<span class="pub-meta">${p.meta}</span></li>`).join("")}</ul>
+  ${SITE.publications.map(g => `<h3 class="pub-group">${g.group}</h3><ul class="pubs">${g.items.map(p => `<li class="rv">${p.href ? `<a class="pub-title" href="${esc(p.href)}" target="_blank" rel="noopener">${p.title} ${EXT}</a>` : `<span class="pub-title">${p.title}</span>`}<span class="pub-meta">${p.meta}</span></li>`).join("")}</ul>`).join("")}
+</section>
+
+<section class="wrap about-block" aria-labelledby="talks-title">
+  <div class="section-head"><div><p class="kicker dash">Talks</p><h2 class="display section-title" id="talks-title">Presentations.</h2></div></div>
+  <ul class="pubs talks">${SITE.talks.map(t => `<li class="rv"><span class="pub-title">${t.title}</span><span class="pub-meta">${t.place} · ${t.when}</span></li>`).join("")}</ul>
 </section>
 
 <section class="wrap about-block" aria-labelledby="skills-title">
   <div class="section-head"><div><p class="kicker dash">Capabilities</p><h2 class="display section-title" id="skills-title">Toolkit.</h2></div></div>
   <div class="skills">${SITE.skills.map(s => `<div class="skill-group rv"><h3>${s.group}</h3><ul class="chips">${s.items.map(x => `<li>${x}</li>`).join("")}</ul></div>`).join("")}</div>
+</section>
+
+<section class="wrap about-block" aria-labelledby="more-title">
+  <div class="section-head"><div><p class="kicker dash">Also</p><h2 class="display section-title" id="more-title">Certifications, languages, affiliations.</h2></div></div>
+  <div class="more-grid">
+    <div class="more-col rv"><h3>Certifications</h3><ul class="more-list">${SITE.certifications.map(c => `<li><span class="more-title">${c.title}</span><span class="more-meta">${c.by} · ${c.when}</span></li>`).join("")}</ul></div>
+    <div class="more-col rv"><h3>Languages</h3><ul class="chips">${SITE.languages.map(l => `<li>${l}</li>`).join("")}</ul></div>
+    <div class="more-col rv"><h3>Affiliations</h3><ul class="more-list">${SITE.affiliations.map(a => `<li><span class="more-title">${a.title}</span><span class="more-meta">${a.when}</span></li>`).join("")}</ul></div>
+  </div>
 </section>
 
 <section class="wrap about-block" id="get-in-touch" aria-labelledby="touch-title">

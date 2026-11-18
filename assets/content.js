@@ -135,7 +135,135 @@
         { term: "MAML", def: "Model-Agnostic Meta-Learning. Trains model weights that adapt to a new task in a few steps." },
         { term: "Reptile", def: "A simpler meta-learning method from OpenAI with the same goal as MAML and lower computational cost." }
       ],
-      related: ["text2simulation", "dementia-review", "glazingshopee"]
+      related: ["metaeta", "multimodal-eta", "text2simulation"]
+    },
+
+    // From the CV (TRU_Mubarak_CV.tex, 2026-11-17). Results are described in words: the exact figures come from the
+    // MetaETA manuscript, which is under review (his rule: no exact numbers from unpublished papers, especially MetaETA).
+    {
+      id: "metaeta",
+      title: "MetaETA",
+      titleLines: ["MetaETA"],
+      type: "Research",
+      tagline: "Meta-learning",
+      tags: ["meta-learning", "few-shot", "graph attention", "travel time", "new cities", "ETA"],
+      years: "2026",
+      when: "Jan – Aug 2026",
+      role: "Research Assistant",
+      org: "SPIN Lab, Wilfrid Laurier University",
+      tools: ["Python", "PyTorch", "Graph Attention Networks", "Meta-learning", "OpenStreetMap"],
+      cover: "fewshot",
+      seed: 19,
+      featured: false,
+      hook: "A graph model that learns from two cities, then estimates travel times on every road of a new city from 25 recorded trips, with no retraining.",
+      thesis: "Travel-time estimates for a city with almost no data, from its first handful of trips, without training a new model.",
+      metric: { value: "25", label: "trips to start estimating a new city" },
+      outcomes: [
+        { value: "2", label: "source cities, Porto and San Francisco" },
+        { value: "25", label: "recorded trips per new city" },
+        { value: "0", label: "retraining for a new city" }
+      ],
+      sections: [
+        {
+          id: "problem", title: "A new city has no history",
+          blocks: [
+            { t: "p", text: "ETA models learn from millions of past trips. A city that is new to a service has almost none, so a model trained elsewhere does not know its roads, and training a new one needs data that does not exist yet." },
+            { t: "p", text: "Meta-learning methods such as Model-Agnostic Meta-Learning (MAML) and OpenAI's Reptile help, but they still retrain the model for every new city." }
+          ]
+        },
+        {
+          id: "approach", title: "Adapt without retraining",
+          blocks: [
+            { t: "p", text: "MetaETA is a Graph Attention Network trained on two source cities, Porto and San Francisco. In a new city it reads only the roads driven by a handful of recorded trips and estimates travel times on every road, with no retraining." },
+            { t: "flow", label: "From two cities to a new one", steps: [
+              { title: "Learn", text: "Trained on taxi trips in Porto and San Francisco." },
+              { title: "Observe", text: "In a new city, read the roads driven by 25 recorded trips." },
+              { title: "Estimate", text: "Predict travel times on every road of the new city." },
+              { title: "Serve", text: "Give trip ETAs at once, with no retraining." }
+            ] }
+          ]
+        },
+        {
+          id: "results", title: "Results",
+          blocks: [
+            { t: "p", text: "Tested in Chengdu, Daegu and Shanghai with as few as 25 recorded trips per city, MetaETA kept trip-time error low without retraining, and predicted each trip faster than the meta-learning methods that retrain." },
+            { t: "links", items: [
+              { kicker: "Paper · under review", title: "MetaETA: A Meta-Learning Framework for Link-Level Travel Time Estimation" },
+              { kicker: "Project", title: "LinkETA", text: "The road-segment ETA model this work builds on.", view: "linketa" }
+            ] }
+          ]
+        }
+      ],
+      glossary: [
+        { term: "Meta-learning", def: "Training a model so it can adapt to a new task, here a new city, from very little data." },
+        { term: "Few-shot", def: "Learning from only a few examples, here 25 recorded trips." },
+        { term: "Graph Attention Network", def: "A neural network on a graph where each road weighs information from the roads around it." },
+        { term: "Retraining", def: "Updating a model's weights on new data, which takes time and data a new city does not have." }
+      ],
+      related: ["linketa", "multimodal-eta", "text2simulation"]
+    },
+
+    // From the CV. The paper is accepted at IEEE WF-IoT 2026 but not yet published, so results are in words here too.
+    {
+      id: "multimodal-eta",
+      title: "Multimodal ETA",
+      titleLines: ["Multimodal", "ETA"],
+      type: "Research",
+      tagline: "Transit ETA",
+      tags: ["multimodal", "bus", "transit", "dwell time", "GRU", "OpenTripPlanner", "ETA"],
+      years: "2026",
+      when: "Feb – May 2026",
+      role: "Research Assistant",
+      org: "SPIN Lab, Wilfrid Laurier University",
+      tools: ["Python", "PyTorch", "LinkETA", "Bidirectional GRU", "OpenTripPlanner"],
+      cover: "transit",
+      seed: 23,
+      featured: false,
+      hook: "LinkETA extended to buses and built into OpenTripPlanner, to estimate commutes that mix bus and taxi.",
+      thesis: "Door-to-door commute estimates that use traffic and stop dwell times, not just the bus timetable.",
+      metric: { value: "61", label: "San Francisco Muni bus routes in the data" },
+      outcomes: [
+        { value: "59,335", label: "San Francisco Muni bus trips" },
+        { value: "61", label: "bus routes" },
+        { value: "2", label: "travel modes in one journey, bus and taxi" }
+      ],
+      sections: [
+        {
+          id: "problem", title: "Commutes mix modes",
+          blocks: [
+            { t: "p", text: "Many commutes combine a bus ride with a taxi. Trip planners usually estimate the bus legs from the timetable, which ignores traffic on the road and the time a bus waits at each stop." }
+          ]
+        },
+        {
+          id: "approach", title: "Roads and stops, both learned",
+          blocks: [
+            { t: "p", text: "I extended LinkETA to buses with a bidirectional GRU module that predicts the dwell time at each stop, trained on 59,335 San Francisco Muni trips over 61 routes. The model runs inside OpenTripPlanner, which plans the journey and asks it for the time of each bus and taxi leg." },
+            { t: "flow", label: "One journey, two modes", steps: [
+              { title: "Plan", text: "OpenTripPlanner finds the journey and its legs." },
+              { title: "Bus legs", text: "LinkETA times each road segment, and the GRU adds the dwell time at each stop." },
+              { title: "Taxi legs", text: "LinkETA times the drive in current traffic." },
+              { title: "Journey ETA", text: "The legs add up to a door-to-door estimate." }
+            ] }
+          ]
+        },
+        {
+          id: "results", title: "Results",
+          blocks: [
+            { t: "p", text: "On test trips across ten routes, the learned estimates cut the trip-time error of timetable-based estimates by about half, and model inference took milliseconds per trip, fast enough for trip planning." },
+            { t: "links", items: [
+              { kicker: "Paper · IEEE WF-IoT 2026 (to appear)", title: "Link-Level Spatio-Temporal Travel Time Prediction for Multi-Modal Commute Trip Estimation" },
+              { kicker: "Project", title: "LinkETA", text: "The road-segment model inside each leg.", view: "linketa" }
+            ] }
+          ]
+        }
+      ],
+      glossary: [
+        { term: "Multimodal", def: "A journey that uses more than one way of travelling, here bus and taxi." },
+        { term: "Dwell time", def: "How long a bus stays at a stop while passengers get on and off." },
+        { term: "GRU", def: "Gated Recurrent Unit, a neural network for sequences. A bidirectional GRU reads the sequence of stops in both directions." },
+        { term: "OpenTripPlanner", def: "Open-source software that plans journeys across buses, trains, walking and driving." }
+      ],
+      related: ["linketa", "metaeta", "text2simulation"]
     },
 
     {
@@ -205,7 +333,7 @@
               { value: "0", label: "extra LLM calls" }
             ] },
             { t: "links", items: [
-              { kicker: "Paper · IEEE Xplore", title: "Text2Simulation: A Natural Language Interface for Transportation Digital Twin Systems" },
+              { kicker: "Paper · IEEE GESS 2026 (to appear)", title: "Text2Simulation: A Natural Language Interface for Transportation Digital Twin Systems" },
               { kicker: "Finding", title: "Teaching an LLM agent to say no", text: "Why the verifier matters more than the parser.", view: "note-say-no" }
             ] }
           ]
@@ -594,21 +722,33 @@
   /* ------------------------------------------------------------------ */
   SITE.bio = [
     "I'm a machine learning researcher in Waterloo, Ontario, working on travel-time estimation and digital twins for urban mobility.",
-    "At the SPIN Lab at Wilfrid Laurier University, my work runs from raw data to a usable system. I've built a pipeline that turns taxi GPS traces into millions of road-segment travel times, a graph model that predicts those times, a dispatch simulation that matches taxis to passengers, and an LLM agent that sets up those simulations from plain language.",
+    "At the SPIN Lab at Wilfrid Laurier University, my work runs from raw data to a usable system. I've built a pipeline that turns taxi GPS traces into millions of road-segment travel times, graph models that predict those times, even in a new city from a handful of trips and for commutes that mix bus and taxi, a dispatch simulation that matches taxis to passengers, and an LLM agent that sets up those simulations from plain language.",
     "Before my master's, I spent two years as an IT consultant in Mumbai, leading web products for the glass façade industry and coordinating a five-person team."
   ];
 
+  // Timeline, teaching, publications, talks, certifications, languages and affiliations: from the CV
+  // (job_pipeline/applications/2026-11-10/TRU_SessionalFaculty/TRU_Mubarak_CV.tex, 2026-11-17). Teaching sits in its own section.
   SITE.timeline = [
-    { when: "Jan 2025 – present", type: "Work", role: "Research Assistant", org: "SPIN Lab, Wilfrid Laurier University, Waterloo",
-      text: "Travel-time estimation and digital twins for urban mobility: <a href=\"#linketa\">LinkETA</a>, DTUMOS, <a href=\"#text2simulation\">Text2Simulation</a>, and a <a href=\"#dementia-review\">systematic review</a> with SQUAD Lab." },
-    { when: "Jan 2025 – Apr 2026", type: "Teaching", role: "Graduate Teaching Assistant", org: "Wilfrid Laurier University, Waterloo",
-      text: "CP421 Data Mining (MapReduce, clustering, recommender systems) and CP476 Internet Computing (web development). Managed student groups, graded assignments, projects and presentations, and proctored exams." },
+    { when: "Jan 2025 – present", type: "Research", role: "Research Assistant", org: "SPIN Lab, Wilfrid Laurier University, Waterloo",
+      text: "Travel-time estimation and digital twins for urban mobility: <a href=\"#linketa\">LinkETA</a>, <a href=\"#metaeta\">MetaETA</a>, <a href=\"#multimodal-eta\">Multimodal ETA</a>, DTUMOS, <a href=\"#text2simulation\">Text2Simulation</a>, and a <a href=\"#dementia-review\">systematic review</a> with SQUAD Lab." },
     { when: "Sep 2024 – Apr 2026", type: "Education", role: "Master of Applied Computing", org: "Wilfrid Laurier University, Waterloo",
-      facts: ["GPA 10.75/12", "Award for Outstanding Graduate Work, Class of 2026", "Thesis: <a href=\"https://scholars.wlu.ca/etd/2908/\" target=\"_blank\" rel=\"noopener\">Intelligent Digital Twin System for Urban Mobility</a>"] },
-    { when: "Jun 2022 – Jun 2024", type: "Work", role: "IT Consultant", org: "Glazingshopee, Mumbai",
-      text: "Led product development for FacadeMart, Buyglass24 and EdFacade, and coordinated a 5-person cross-functional team. <a href=\"/demos/igu-quote/\">Try the demo</a>." },
+      facts: ["GPA 10.75/12", "Award for Outstanding Graduate Work, Class of 2026",
+        "Thesis: <a href=\"https://scholars.wlu.ca/etd/2908/\" target=\"_blank\" rel=\"noopener\">Intelligent Digital Twin System for Urban Mobility</a>, defended April 2026",
+        "Supervisors: Dr. Sukhjit Singh Sehra and Dr. Emad A. Mohammed",
+        "Coursework: Practical Algorithm Design, Data Analysis, Advanced Parallel Programming, Machine Learning"] },
+    { when: "Jun 2022 – Jun 2024", type: "Industry", role: "IT Consultant", org: "Glazingshopee, Mumbai",
+      text: "Led product development for FacadeMart, Buyglass24 and EdFacade, interviewed clients and end users to turn their workflows into software requirements, and coordinated a 5-person cross-functional team. <a href=\"/demos/igu-quote/\">Try the demo</a>." },
     { when: "Jul 2018 – May 2022", type: "Education", role: "B.Tech. in Computer Science and Engineering", org: "Sanjay Ghodawat University, Kolhapur",
-      facts: ["GPA 8.29/10", "SGU Best Project Award (2021–22) for <a href=\"#fake-news\">fake news detection</a>"] }
+      facts: ["GPA 8.29/10", "Final-year project: <a href=\"#fake-news\">fake news detection</a> with a hybrid BiLSTM-TCN model", "SGU Best Project Award (2021–22)"] },
+    { when: "Jan – Feb 2021", type: "Internship", role: "Electronics Engineering Intern", org: "Sharp Electronics, Pune",
+      text: "Wrote and flashed Embedded C and 8051 assembly programs for Nuvoton 8051 microcontrollers with a senior software developer, and followed projects from development to delivery." }
+  ];
+
+  SITE.teaching = [
+    { course: "CP421 Data Mining", when: "Fall 2025, Winter 2026", role: "Graduate Teaching Assistant", count: "223", unit: "undergraduates",
+      text: "A fourth-year course on mining big data: MapReduce, Bloom filters, stream counting, clustering, frequent itemsets and community detection. I held 30 hours of office hours, marked 436 assignment submissions and the reports and presentations of 57 project groups, and wrote feedback that pointed to the exact step where each student went wrong." },
+    { course: "CP476 Internet Computing", when: "Winter 2025, Spring 2025", role: "Graduate Teaching Assistant", count: "190", unit: "undergraduates over two terms",
+      text: "A fourth-year course on building web applications with Apache, PHP, MySQL, JavaScript, Node.js and MongoDB. I evaluated the project reports and presentations of 50 groups, built a rubric checklist for software design documents, and invigilated midterms and finals." }
   ];
 
   SITE.awards = [
@@ -618,19 +758,51 @@
     { value: "2021–22", title: "SGU Best Project Award", text: "For the fake news detection paper, Sanjay Ghodawat University." }
   ];
 
+  // Journal names are left out while the manuscripts are under review or revision (as in the CV).
   SITE.publications = [
-    { title: "Intelligent Digital Twin System for Urban Mobility", meta: "Master's thesis · Wilfrid Laurier University · 2026", href: "https://scholars.wlu.ca/etd/2908/" },
-    { title: "LinkETA: A Multi-Relational Graph Transformer for Link-Level Travel Time Estimation", meta: "SSRN", href: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7379984" },
-    { title: "Link-Level Spatio-Temporal Travel Time Prediction for Multi-Modal Commute Trip Estimation", meta: "IEEE Xplore" },
-    { title: "Text2Simulation: A Natural Language Interface for Transportation Digital Twin Systems", meta: "IEEE Xplore" },
-    { title: "Fake News Detection Using Hybrid BiLSTM-TCN Model with Attention Mechanism", meta: "IEEE Xplore · 2023", href: "https://ieeexplore.ieee.org/document/10140491" }
+    { group: "Journal manuscripts", items: [
+      { title: "LinkETA: A Multi-Relational Graph Transformer for Link-Level Travel Time Estimation", meta: "Under revision · preprint on SSRN", href: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7379984" },
+      { title: "MetaETA: A Meta-Learning Framework for Link-Level Travel Time Estimation", meta: "Under review" },
+      { title: "Affect Recognition in Socially Assistive Robots for Dementia Care: A Systematic Review", meta: "Under review" }
+    ] },
+    { group: "Conference papers", items: [
+      { title: "Link-Level Spatio-Temporal Travel Time Prediction for Multi-Modal Commute Trip Estimation", meta: "IEEE 12th World Forum on Internet of Things (WF-IoT) · Abu Dhabi · 2026 · to appear" },
+      { title: "Text2Simulation: A Natural Language Interface for Transportation Digital Twin Systems", meta: "IEEE International Conference on Green Energy and Smart Systems (GESS) · Long Beach · 2026 · to appear" },
+      { title: "Fake News Detection Using Hybrid BiLSTM-TCN Model with Attention Mechanism", meta: "ICAAIC · IEEE · Salem, India · 2023", href: "https://ieeexplore.ieee.org/document/10140491" }
+    ] },
+    { group: "Thesis", items: [
+      { title: "Intelligent Digital Twin System for Urban Mobility", meta: "Master's thesis · Wilfrid Laurier University · 2026", href: "https://scholars.wlu.ca/etd/2908/" }
+    ] }
+  ];
+
+  SITE.talks = [
+    { title: "IEEE International Conference on Green Energy and Smart Systems (GESS)", place: "Long Beach, CA, USA", when: "Nov 2026" },
+    { title: "IEEE 12th World Forum on Internet of Things (WF-IoT)", place: "Abu Dhabi, UAE", when: "Oct 2026" },
+    { title: "Master's thesis defence", place: "Department of Physics and Computer Science, Wilfrid Laurier University", when: "Apr 2026" },
+    { title: "2nd International Conference on Applied Artificial Intelligence and Computing (ICAAIC), IEEE", place: "Salem, India", when: "May 2023" }
   ];
 
   SITE.skills = [
-    { group: "Machine learning", items: ["Python", "R", "Transformers", "GNN", "CNN", "LSTM", "NLP", "DQN", "LLMs", "Spatiotemporal prediction", "Meta-learning", "Reinforcement learning", "Recommendation systems", "Clustering", "LangChain", "LangGraph"] },
+    { group: "Programming", items: ["Python", "Java", "C/C++", "R"] },
+    { group: "Machine learning", items: ["Transformers", "GNN", "CNN", "LSTM", "NLP", "DQN", "LLMs", "Spatiotemporal prediction", "Meta-learning", "Reinforcement learning", "Recommendation systems", "Clustering", "LangChain", "LangGraph"] },
     { group: "Maps and geospatial", items: ["OSRM", "OpenStreetMap", "Map matching", "OR-Tools", "GeoPandas", "Shapely", "Folium", "Simulation"] },
     { group: "Libraries", items: ["NumPy", "Pandas", "SciPy", "scikit-learn", "PyTorch", "TensorFlow", "Keras", "PyG", "Matplotlib", "Seaborn"] },
-    { group: "Data and engineering", items: ["SQL (MySQL)", "MongoDB", "Hadoop", "CUDA", "Airflow", "Git", "AWS", "Docker", "Jira", "Agile", "PRISMA reviews", "Unit testing", "QA testing"] }
+    { group: "Data and engineering", items: ["SQL (MySQL)", "MongoDB", "Hadoop", "Linux", "CUDA", "Airflow", "Git", "AWS", "Docker", "Jira", "Agile", "PRISMA reviews", "Unit testing", "QA testing"] }
+  ];
+
+  SITE.certifications = [
+    { title: "Graduate Teaching Assistant Training: Best Practices in Teaching", by: "Wilfrid Laurier University", when: "Jan 2025" },
+    { title: "AODA Integrated Accessibility Training", by: "Wilfrid Laurier University", when: "Jan 2025" },
+    { title: "Planning a Literature Review, ASPIRE Workshop", by: "Wilfrid Laurier University Library", when: "Dec 2024" },
+    { title: "Python for Data Science, Elite certificate", by: "NPTEL, IIT Madras", when: "Aug 2022" },
+    { title: "Programming in Java, score 95%", by: "NPTEL, IIT Kharagpur", when: "Apr 2020" }
+  ];
+
+  SITE.languages = ["English (IELTS 8 of 9)", "Hindi", "Marathi", "Urdu"];
+
+  SITE.affiliations = [
+    { title: "Canadian Artificial Intelligence Association (CAIAC)", when: "Member since 2026" },
+    { title: "ML Collective (MLC)", when: "Member since 2026" }
   ];
 
   /* ------------------------------------------------------------------ */

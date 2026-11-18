@@ -964,6 +964,26 @@ a.pub-title:hover { color: var(--accent); text-decoration: underline; }
 .skill-group h3 { font-size: 1.15rem; font-weight: 700; font-stretch: 108%; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
 .chips li { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 0.9rem; }
+/* About: teaching cards, grouped publications, talks, and certifications / languages / memberships (from the CV, 2026-11-18) */
+.teach { display: grid; gap: 16px; }
+@media (min-width: 860px) { .teach { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; } }
+.teach-card { display: grid; gap: 8px; align-content: start; padding: 22px 24px 24px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.teach-when { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.08em; color: var(--muted); }
+.teach-course { font-family: var(--display); font-weight: 700; font-stretch: 104%; font-size: 1.3rem; line-height: 1.2; }
+.teach-role { color: var(--muted); font-size: 0.95rem; }
+.teach-count { font-size: 0.95rem; color: var(--muted); }
+.teach-count strong { font-family: var(--display); font-weight: 800; font-size: 1.6rem; color: var(--accent); margin-right: 4px; font-variant-numeric: tabular-nums; }
+.teach-text { line-height: 1.65; }
+.pub-group { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 28px 0 10px; }
+.pub-group:first-of-type { margin-top: 0; }
+.more-grid { display: grid; gap: 28px; }
+@media (min-width: 900px) { .more-grid { grid-template-columns: 1.6fr 1fr 1.2fr; gap: 40px; } }
+.more-col { display: grid; gap: 12px; align-content: start; }
+.more-col h3 { font-size: 1.15rem; font-weight: 700; font-stretch: 108%; }
+.more-list { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1px solid var(--line); }
+.more-list li { display: grid; gap: 2px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.more-title { font-weight: 600; line-height: 1.4; }
+.more-meta { font-size: 0.88rem; color: var(--muted); }
 .about-block { padding-top: clamp(72px, 9vw, 120px); }
 .about-block:last-child { padding-bottom: clamp(80px, 10vw, 140px); }
 
