@@ -1,14 +1,14 @@
 /* "The map learns itself": the home page hero animation, drawn faintly behind the headline.
    It uses the real street network of central San Francisco (OpenStreetMap, loaded from sf-roads.js only on
-   the home page), a different neighbourhood each loop. One loop of the research pipeline:
+   the home page), three neighbourhoods in a fixed order, one per loop. One loop of the research pipeline:
      1. GPS pings    - on an empty background, taxi trips report their position, scattered by GPS noise
      2. Roads        - map matching: each ping slides onto the street it came from while the complete
                        street map draws itself in; the travelled streets stand out
      3. Travel times - a sweep passes; each travelled street thickens by how slow it is, a few show a
                        travel time, then taxis drive the map
    The taxis are REAL: 2-minute slices of 2008 San Francisco cab trips on busy Saturday evenings (Cabspotting,
-   map-matched to the same streets; built by scripts/build-sf-taxis.py into sf-taxis.js), replayed 12x faster,
-   each loop in the neighbourhood that was busiest at that moment. The pings, lit streets and travel-time
+   map-matched to the same streets; built by scripts/build-sf-taxis.py into sf-taxis.js), replayed 12x faster:
+   each neighbourhood plays the moment that was busiest there. The pings, lit streets and travel-time
    labels are illustrative. If the trips can't load, taxis wander the streets instead; if the streets can't
    load, a synthetic city is used. No pointer interaction. Reduced motion: one still frame.
    SHOW_ON_LIVE keeps it off mubarak.sh until approved; it always runs in previews and local tests. */
@@ -26,10 +26,14 @@
   const T = { pings: 200, match: 4200, learn: 6800, ride: 7600, fade: 15500, end: 17000 };
   const STEP_AT = [T.pings, T.match, T.learn];   // when each caption step lights up
   const REVEAL_END = T.match + 1300 + 250 + 700; // by now the complete street map has drawn itself in
-  // Neighbourhoods each loop can centre on: Financial District, SoMa, Mission, Hayes Valley, Nob Hill,
-  // Western Addition, Civic Center.
-  const ANCHORS = [[-122.3999, 37.7946], [-122.4056, 37.7785], [-122.4148, 37.7599], [-122.4245, 37.7759],
-    [-122.4161, 37.7930], [-122.4330, 37.7816], [-122.4180, 37.7793]];
+  // Neighbourhoods (view centres). The loops show SEQUENCE in this fixed order, then repeat (chosen
+  // 2026-11-17): the Mission (the curving freeway), the Financial District (the bay beside it), Hayes Valley
+  // (the mesh of diagonal streets). The other places are kept here to add later.
+  const PLACES = {
+    mission: [-122.4148, 37.7599], financialDistrict: [-122.3999, 37.7946], hayesValley: [-122.4245, 37.7759],
+    soma: [-122.4056, 37.7785], nobHill: [-122.4161, 37.7930], westernAddition: [-122.4330, 37.7816], civicCenter: [-122.4180, 37.7793]
+  };
+  const SEQUENCE = ["mission", "financialDistrict", "hayesValley"];
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp01 = v => Math.max(0, Math.min(1, v));
@@ -108,17 +112,6 @@
     return data._moments;
   }
   const SCALE = w => (w < 700 ? 0.42 : 0.34);   // pixels per metre
-  // The neighbourhood to show for a moment: one of the anchors where many of that moment's taxis drive.
-  function busyAnchor(data, moment, w, h) {
-    const [lonMin, latMin, , latMax] = data.bbox, lat0 = (latMin + latMax) / 2;
-    const mx = 111320 * Math.cos(lat0 * Math.PI / 180), my = 110540, s = SCALE(w), vw = w / s, vh = h / s;
-    const counts = ANCHORS.map(([lon, lat]) => {
-      const cx = (lon - lonMin) * mx, cy = (latMax - lat) * my;
-      return moment.trips.filter(tr => tr.xs.some((x, i) => Math.abs(x - cx) < vw / 2 && Math.abs(tr.ys[i] - cy) < vh / 2)).length;
-    });
-    const top = Math.max(...counts), good = ANCHORS.filter((a, i) => counts[i] >= 0.65 * top);
-    return good[Math.floor(Math.random() * good.length)];
-  }
   // Decode once: streets in metres from the north-west corner of the data's bounding box.
   function decode(data) {
     if (data._streets) return data._streets;
@@ -130,15 +123,14 @@
     });
     return data._streets;
   }
-  // The part of San Francisco that fits the hero, at s px per metre, centred on a neighbourhood
-  // (the given anchor, or a random one).
-  function makeCitySF(data, w, h, anchor) {
+  // The part of San Francisco that fits the hero, at s px per metre, centred on a neighbourhood (moved only
+  // as far as needed to stay inside the street data).
+  function makeCitySF(data, w, h, [alon, alat]) {
     const streets = decode(data), s = SCALE(w);
     const [lonMin, latMin, lonMax, latMax] = data.bbox, lat0 = (latMin + latMax) / 2;
     const mx = 111320 * Math.cos(lat0 * Math.PI / 180), my = 110540;
-    const [alon, alat] = anchor || ANCHORS[Math.floor(Math.random() * ANCHORS.length)];
     const vw = w / s, vh = h / s;
-    let cx = (alon - lonMin) * mx + rand(-300, 300), cy = (latMax - alat) * my + rand(-300, 300);
+    let cx = (alon - lonMin) * mx, cy = (latMax - alat) * my;
     cx = vw >= data.w ? data.w / 2 : Math.max(vw / 2, Math.min(data.w - vw / 2, cx));
     cy = vh >= data.h ? data.h / 2 : Math.max(vh / 2, Math.min(data.h - vh / 2, cy));
     const x0 = cx - vw / 2, y0 = cy - vh / 2, pad = 60 / s;
@@ -172,6 +164,12 @@
       out.push({ ts: tr.ts, xs, ys, k: 0, fadeIn: tr.ts[0] > -5, fadeOut: tr.ts[n - 1] < windowS + 5 });
     }
     return out;
+  }
+  // The moment with the most real taxis in this view (a random one of the near-busiest, for variety).
+  function busiestMoment(city, moments, windowS) {
+    const options = moments.map(m => ({ m, riders: realRiders(city, m, windowS) }));
+    const top = Math.max(...options.map(o => o.riders.length)), good = options.filter(o => o.riders.length >= 0.8 * top);
+    return good[Math.floor(Math.random() * good.length)];
   }
   // Position of a real taxi at real time rt (seconds); r.k remembers the segment, as time only moves forward.
   function taxiAt(r, rt) {
@@ -322,6 +320,7 @@
     const reduceMQ = g.matchMedia("(prefers-reduced-motion: reduce)");
     const base = doc.createElement("canvas"), bctx = base.getContext("2d");   // the faint city, drawn once per city
     let w = 0, h = 0, dpr = 1, city = null, pings = [], riders = [], textRects = [], roads = null, dead = false;
+    let place = 0;   // index into SEQUENCE: moves on at the end of each loop (a resize redraws the same place)
     let taxis = null, taxiWindow = 120;   // decoded real-trip moments, when they loaded
     const when = shell.querySelector("[data-taxi-when]"), whenLabel = shell.querySelector("[data-taxi-label]");
     function showWhen(label) {   // credit line: which real evening the taxis are from
@@ -402,15 +401,19 @@
       baseTone = muted.join(",");
     }
     function newCity() {
-      // Real taxis: a random busy Saturday-evening moment, shown in a neighbourhood where its taxis drive.
-      const moment = roads && taxis ? taxis[Math.floor(Math.random() * taxis.length)] : null;
-      if (moment) { showWhen(moment.label); measureText(); } else showWhen(null);
-      city = roads ? makeCitySF(roads, w, h, moment ? busyAnchor(roads, moment, w, h) : null) : makeCitySynthetic(w, h);
+      // The current neighbourhood of the sequence, with the Saturday-evening moment that has the most real
+      // taxis in its view.
+      let pick = null;
+      if (roads) {
+        city = makeCitySF(roads, w, h, PLACES[SEQUENCE[place]]);
+        pick = taxis ? busiestMoment(city, taxis, taxiWindow) : null;
+      } else city = makeCitySynthetic(w, h);
+      if (pick) { showWhen(pick.m.label); measureText(); } else showWhen(null);
       pings = makeTrips(city);
       schedule(city, pings);
       pickLabels(city, textRects);
-      city.real = !!(moment && city.view);
-      riders = city.real ? realRiders(city, moment, taxiWindow) : makeRiders(city, w >= 1000 ? 14 : 6, textRects);
+      city.real = !!pick;
+      riders = pick ? pick.riders : makeRiders(city, w >= 1000 ? 14 : 6, textRects);
       readColors();
       drawBase();
     }
@@ -540,7 +543,7 @@
       last = ts;
       if (ts - colorsAt > 1000) { readColors(); colorsAt = ts; }
       t += dt;
-      if (t >= T.end) { newCity(); t = 0; }
+      if (t >= T.end) { place = (place + 1) % SEQUENCE.length; newCity(); t = 0; }
       if (t > T.ride && !city.real) riders.forEach(r => advance(city, r, dt));
       setStep(t >= T.fade ? -1 : t >= STEP_AT[2] ? 2 : t >= STEP_AT[1] ? 1 : t >= STEP_AT[0] ? 0 : -1);
       draw(t, false);
