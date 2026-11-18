@@ -6,7 +6,7 @@
                        street map draws itself in; the travelled streets stand out
      3. Travel times - a sweep passes; each travelled street thickens by how slow it is, a few show a
                        travel time, then taxis drive the map
-   The taxis are REAL: 2-minute slices of 2008 San Francisco cab trips on busy Saturday evenings (Cabspotting,
+   The taxis are REAL: 2-minute slices of San Francisco cab trips on busy Saturday evenings (Cabspotting,
    map-matched to the same streets; built by scripts/build-sf-taxis.py into sf-taxis.js), replayed 12x faster:
    each neighbourhood plays the moment that was busiest there. The pings, lit streets and travel-time
    labels are illustrative. If the trips can't load, taxis wander the streets instead; if the streets can't
