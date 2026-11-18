@@ -410,7 +410,7 @@
     return `
 <section class="wrap page-hero" aria-labelledby="work-title">
   <p class="kicker dash">Work</p>
-  <h1 class="display page-title lines" id="work-title" tabindex="-1">${lines(["Six projects.", "Research, systems", "and product."])}</h1>
+  <h1 class="display page-title lines" id="work-title" tabindex="-1">${lines([`${["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][SITE.projects.length] || SITE.projects.length} projects.`, "Research, systems", "and product."])}</h1>
   <p class="page-lede">From a graph model of city traffic to a quotation tool for glass façades. Each project opens a case study with the problem, the method, and the results.</p>
 </section>
 <section class="wrap" aria-label="Project list">
