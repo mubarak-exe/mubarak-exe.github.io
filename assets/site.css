@@ -266,6 +266,23 @@ kbd {
 .map-hint a:hover { text-decoration: underline; }
 .map-credit { display: block; margin-top: 4px; font-size: 0.74rem; opacity: 0.85; }
 .map-credit a { color: inherit; font-weight: 400; text-decoration: underline; }
+/* The LinkETA panel follows the day/night theme, like the demo inside it (2026-11-18). Route colours by day are the
+   demo's own day colours, so the legend matches the map; by night the usual map colours. */
+.map-card[data-map="linketa"] { background: var(--surface); color: var(--ink); border-color: var(--line);
+  --eta-free: #1E7A50; --eta-slow: #9A5A00; --eta-busy: #B3261E; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .map-card[data-map="linketa"] { --eta-free: var(--map-free); --eta-slow: var(--map-slow); --eta-busy: var(--map-jam); }
+}
+:root[data-theme="dark"] .map-card[data-map="linketa"] { --eta-free: var(--map-free); --eta-slow: var(--map-slow); --eta-busy: var(--map-jam); }
+.map-card[data-map="linketa"] .map-head, .map-card[data-map="linketa"] .map-hint { border-color: var(--line); }
+.map-card[data-map="linketa"] .map-live, .map-card[data-map="linketa"] .legend, .map-card[data-map="linketa"] .map-hint,
+.map-card[data-map="linketa"] .map-embed-wait { color: var(--muted); }
+.map-card[data-map="linketa"] .sw-free, .map-card[data-map="linketa"] .live-dot { background: var(--eta-free); }
+.map-card[data-map="linketa"] .sw-slow { background: var(--eta-slow); }
+.map-card[data-map="linketa"] .sw-jam { background: var(--eta-busy); }
+.map-card[data-map="linketa"] .map-hint a { color: var(--accent); }
+.map-card[data-map="linketa"] .map-credit a { color: inherit; }
+.map-card[data-map="linketa"] .map-embed { background: var(--surface-2); }
 .map-foot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--band-line); }
 .map-foot > div { display: grid; gap: 2px; padding: 12px 16px; min-width: 0; }
 .map-foot > div + div { border-left: 1px solid var(--band-line); }
