@@ -51,6 +51,7 @@
       cover: "network",
       seed: 41,
       featured: true,
+      demo: "/demos/linketa/",   // the card opens the demo (separate page) instead of a case study
       hook: "A Graph Transformer that predicts travel time for every road segment, and adapts to a new city from 25 trips.",
       thesis: "Predict travel time for every road segment, not just whole trips, and make the model work in a new city with almost no data.",
       metric: { value: "23.7%", label: "lower error than Baidu's DuETA" },
