@@ -425,7 +425,7 @@
       <div class="map-head"><span class="map-live"><span class="live-dot"></span>LinkETA · live demo</span>
         <ul class="legend" aria-label="Legend"><li><i class="sw sw-free"></i>Free flow</li><li><i class="sw sw-slow"></i>Slow</li><li><i class="sw sw-jam"></i>Busy</li></ul></div>
       <div class="map-embed" data-linketa-embed><p class="map-embed-wait">Loading the LinkETA demo…</p></div>
-      <figcaption class="map-hint">The trained LinkETA model estimates a San Francisco trip road by road, right in your browser. <a href="/demos/linketa/">Open the full demo ${ARR}</a>
+      <figcaption class="map-hint">The trained LinkETA model estimates a San Francisco trip road by road.<a href="/demos/linketa/">Open the full demo ${ARR}</a>
         <span class="map-credit">Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, tiles by OpenFreeMap.</span></figcaption>
     </figure>
   </div>

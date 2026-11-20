@@ -431,12 +431,12 @@
       when: "July – Oct 2026",
       role: "Researcher",
       org: "SQUAD Lab, Wilfrid Laurier University",
-      tools: ["Systematic review", "Multimodal affect recognition", "Socially assistive robots"],
+      tools: ["Systematic review", "Multimodal affect recognition", "Socially Assistive Robots"],
       cover: "signals",
       seed: 29,
       featured: false,
-      hook: "A systematic review of how socially assistive robots recognize emotion in people living with dementia, and why lab results don't transfer.",
-      thesis: "How well can socially assistive robots recognize emotion in people living with dementia, and do lab results hold up in real care?",
+      hook: "A systematic review of how Socially Assistive Robots recognize emotion in people living with dementia, and why lab results don't transfer.",
+      thesis: "How well can Socially Assistive Robots recognize emotion in people living with dementia, and do lab results hold up in real care?",
       metric: { value: "31", label: "studies reviewed" },
       outcomes: [
         { value: "31", label: "studies reviewed" },
@@ -447,7 +447,7 @@
         {
           id: "question", title: "Can a robot read how someone feels?",
           blocks: [
-            { t: "p", text: "Socially assistive robots are being studied as a support in dementia care. To respond well, a robot needs to recognize a person's emotional state. This review asked how well current methods do that, and whether the results hold up outside the lab." }
+            { t: "p", text: "Socially Assistive Robots are being studied as a support in dementia care. To respond well, a robot needs to recognize a person's emotional state. This review asked how well current methods do that, and whether the results hold up outside the lab." }
           ]
         },
         {
@@ -482,7 +482,7 @@
       glossary: [
         { term: "Affect recognition", def: "Estimating a person's emotional state from signals such as the face, voice or body." },
         { term: "Multimodal", def: "Using more than one kind of signal at the same time." },
-        { term: "Socially assistive robot", def: "A robot designed to help people through social interaction, such as conversation or companionship." },
+        { term: "Socially Assistive Robot", def:"A robot designed to help people through social interaction, such as conversation or companionship." },
         { term: "Systematic review", def: "A structured review that searches, screens and compares all relevant studies on a question using a defined method." }
       ],
       related: ["linketa", "text2simulation", "fake-news"]
@@ -700,7 +700,7 @@
       project: "dementia-review",
       sections: [
         { id: "review", title: "The review", blocks: [
-          { t: "p", text: "With SQUAD Lab at Wilfrid Laurier University, I conducted a systematic review of multimodal affect recognition by socially assistive robots in dementia care. It covered 31 studies across facial, speech, physiological and body-movement signals." }
+          { t: "p", text: "With SQUAD Lab at Wilfrid Laurier University, I conducted a systematic review of multimodal affect recognition by Socially Assistive Robots in dementia care. It covered 31 studies across facial, speech, physiological and body-movement signals." }
         ] },
         { id: "gap", title: "The gap", blocks: [
           { t: "p", text: "The clearest pattern was a gap between settings. Accuracy reported in lab conditions did not hold in real-world care." },
