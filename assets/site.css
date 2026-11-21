@@ -1314,3 +1314,49 @@ main.fade-in { animation: vt-in 0.5s var(--ease) both; }
   .work-row .demo-btn { position: absolute; top: 28px; right: 28px; z-index: 1; padding: 7px 14px; font-size: 0.92rem; }
 }
 .mini-demo { margin-top: 2px; font-size: 0.86rem; font-weight: 700; color: var(--accent); display: inline-flex; gap: 6px; align-items: center; }
+
+/* ---------- Project lists: Cards (grid) or List, switched by the visitor, home + Work (2026-11-21) ---------- */
+.section-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+.work-tools { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 20px; margin-bottom: 28px; }
+.work-tools .filters { margin-bottom: 0; }
+.view-toggle { display: inline-flex; flex: none; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); }
+.view-toggle button { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border: 0; border-radius: 999px; background: transparent;
+  color: var(--muted); font: inherit; font-size: 0.86rem; font-weight: 600; line-height: 1.2; cursor: pointer; transition: background .2s, color .2s; }
+.view-toggle button:hover { color: var(--ink); }
+.view-toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+/* Cards: a grid, picture on top, "Try the demo" over the picture's top-right corner */
+.work-list[data-view="cards"] { grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 18px; align-items: stretch; }
+.work-list[data-view="cards"] .work-row { position: relative; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 16px;
+  padding: 14px 14px 18px; align-items: start; }
+.work-list[data-view="cards"] .work-cover { max-width: none; }
+.work-list[data-view="cards"] .work-body { display: flex; flex-direction: column; gap: 10px; height: 100%; padding: 0 6px; }
+.work-list[data-view="cards"] .work-meta { font-size: 0.86rem; }
+.work-list[data-view="cards"] .work-title { font-size: clamp(1.3rem, 1.7vw, 1.5rem); }
+.work-list[data-view="cards"] .work-hook { font-size: 0.98rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.work-list[data-view="cards"] .work-foot { margin-top: auto; flex-direction: column; align-items: flex-start; gap: 6px; }
+.work-list[data-view="cards"] .work-metric strong { font-size: 1.02rem; }
+.work-list[data-view="cards"] .work-metric small, .work-list[data-view="cards"] .work-cta { font-size: 0.9rem; }
+.work-list[data-view="cards"] .demo-btn { position: absolute; top: 24px; right: 24px; z-index: 1; padding: 7px 14px; font-size: 0.9rem; }
+
+/* List: compact rows without pictures; title and one line, then type, years and the demo button (or the role) */
+.work-list[data-view="list"] { gap: 0; border-top: 1px solid var(--line); }
+.work-list[data-view="list"] .work-row { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; padding: 16px 10px;
+  grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "title cta" "hook hook" "meta meta"; gap: 4px 16px; align-items: center; }
+.work-list[data-view="list"] .work-row:hover { background: var(--surface); }
+.work-list[data-view="list"] .work-cover, .work-list[data-view="list"] .work-metric { display: none; }
+.work-list[data-view="list"] .work-body, .work-list[data-view="list"] .work-top, .work-list[data-view="list"] .work-foot { display: contents; }
+.work-list[data-view="list"] .work-title { grid-area: title; font-size: clamp(1.15rem, 1.6vw, 1.35rem); }
+.work-list[data-view="list"] .work-hook { grid-area: hook; font-size: 0.96rem; line-height: 1.5; max-width: none;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.work-list[data-view="list"] .work-meta { grid-area: meta; font-size: 0.84rem; }
+.work-list[data-view="list"] .demo-btn, .work-list[data-view="list"] .work-cta { grid-area: cta; justify-self: end; }
+.work-list[data-view="list"] .demo-btn { position: static; padding: 6px 14px; font-size: 0.88rem; box-shadow: none; }
+.work-list[data-view="list"] .work-row:has(.demo-btn) .work-cta { display: none; }
+.work-list[data-view="list"] .work-cta { font-size: 0.9rem; }
+@media (min-width: 880px) {
+  .work-list[data-view="list"] .work-row { grid-template-columns: minmax(0, 1fr) minmax(11rem, 15rem) 10rem; grid-template-areas: "title meta cta" "hook meta cta";
+    gap: 4px 28px; padding: 20px 14px; }
+  .work-list[data-view="list"] .work-meta { display: grid; gap: 2px; align-self: center; }
+  .work-list[data-view="list"] .work-meta span + span::before { content: none; }
+}

@@ -93,6 +93,7 @@
     main.querySelectorAll('[data-demo="dispatch"]').forEach(el => safe(() => instances.push(D.mountDispatch(el))));
     main.querySelectorAll('[data-demo="checker"]').forEach(el => safe(() => instances.push(D.mountChecker(el))));
     if (r.view === "work") safe(setupFilters);
+    if (main.querySelector("[data-view-btn]")) safe(setupViewToggle);
     if (r.view === "thinking") safe(setupProcess);
     if (r.view === "about") safe(setupTimeline);
     if (r.view === "about") safe(setupContactForm);
@@ -199,6 +200,28 @@
       };
       if (canVT()) {
         rows.forEach(r => { r.style.viewTransitionName = "row-" + r.dataset.id; });
+        root.classList.add("vt-filter");
+        const vt = doc.startViewTransition(apply);
+        vt.finished.finally(() => { root.classList.remove("vt-filter"); rows.forEach(r => { r.style.viewTransitionName = ""; }); });
+      } else apply();
+    }));
+  }
+
+  /* ---------------- Project lists: List | Cards switch (home + Work), remembered per visitor ---------------- */
+  function setupViewToggle() {
+    const btns = [...main.querySelectorAll("[data-view-btn]")], lists = [...main.querySelectorAll(".work-list[data-view]")];
+    btns.forEach(b => b.addEventListener("click", () => {
+      const v = b.dataset.viewBtn;
+      if (lists.every(l => l.dataset.view === v)) return;
+      try { g.localStorage.setItem("ms-work-view", v); } catch (e) { /* storage unavailable */ }
+      const rows = [...main.querySelectorAll(".work-row")];
+      const apply = () => {
+        lists.forEach(l => { l.dataset.view = v; });
+        btns.forEach(x => x.setAttribute("aria-pressed", String(x.dataset.viewBtn === v)));
+        rows.forEach(r => r.classList.remove("rv-pending"));
+      };
+      if (canVT()) {
+        rows.forEach(r => { if (!r.hidden) r.style.viewTransitionName = "row-" + r.dataset.id; });
         root.classList.add("vt-filter");
         const vt = doc.startViewTransition(apply);
         vt.finished.finally(() => { root.classList.remove("vt-filter"); rows.forEach(r => { r.style.viewTransitionName = ""; }); });

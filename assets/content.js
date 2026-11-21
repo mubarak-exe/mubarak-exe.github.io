@@ -430,7 +430,7 @@
       tags: ["review", "affective computing", "robots", "dementia", "emotion", "datasets"],
       years: "2026",
       when: "July – Oct 2026",
-      role: "Researcher",
+      role: "Research Assistant",
       org: "SQUAD Lab, Wilfrid Laurier University",
       tools: ["Systematic review", "Multimodal affect recognition", "Socially Assistive Robots"],
       cover: "signals",

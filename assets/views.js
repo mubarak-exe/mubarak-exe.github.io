@@ -383,6 +383,18 @@
       </span>
     </a>`;
   }
+  // Project lists can show as cards (a grid with pictures) or as a compact list; the visitor's choice is remembered
+  // for the home page and the Work page (app.js setupViewToggle).
+  const workView = () => { try { return g.localStorage.getItem("ms-work-view") === "list" ? "list" : "cards"; } catch (e) { return "cards"; } };
+  const ICON_LIST = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 3.5h12M2 8h12M2 12.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const ICON_CARDS = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="5" height="5" rx="1.2" fill="currentColor"/><rect x="9" y="2" width="5" height="5" rx="1.2" fill="currentColor"/><rect x="2" y="9" width="5" height="5" rx="1.2" fill="currentColor"/><rect x="9" y="9" width="5" height="5" rx="1.2" fill="currentColor"/></svg>';
+  function viewToggle() {
+    const v = workView();
+    return `<div class="view-toggle" role="group" aria-label="Show projects as">
+      <button type="button" data-view-btn="list" aria-pressed="${v === "list"}">${ICON_LIST}<span>List</span></button>
+      <button type="button" data-view-btn="cards" aria-pressed="${v === "cards"}">${ICON_CARDS}<span>Cards</span></button>
+    </div>`;
+  }
   function miniCard(p) {
     return `<a class="mini-card rv" href="${projHref(p)}"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="work-meta"><span>${p.type}</span><span>${p.years}</span></span><span class="mini-card-title">${p.title}</span>${p.demo ? `<span class="mini-demo">Try the demo ${ARR}</span>` : ""}</a>`;
   }
@@ -441,9 +453,9 @@
 <section class="wrap section" aria-labelledby="sel-title">
   <div class="section-head">
     <div><p class="kicker dash">Selected work</p><h2 class="display section-title" id="sel-title">Research that ends<br>in working systems.</h2></div>
-    <a class="more-link" href="#work">All ${SITE.projects.length} projects ${ARR}</a>
+    <div class="section-tools">${viewToggle()}<a class="more-link" href="#work">All ${SITE.projects.length} projects ${ARR}</a></div>
   </div>
-  <div class="work-list">${featured.map(workRow).join("")}</div>
+  <div class="work-list" data-view="${workView()}">${featured.map(workRow).join("")}</div>
 </section>
 
 <section class="wrap section" aria-labelledby="think-title">
@@ -471,9 +483,12 @@
   <p class="page-lede">From a graph model of city traffic to a quotation tool for glass façades. Each project opens a case study with the problem, the method, and the results.</p>
 </section>
 <section class="wrap" aria-label="Project list">
-  <div class="filters" role="group" aria-label="Filter projects">${types.map(t => `<button class="filter" type="button" data-filter="${t}" aria-pressed="${t === "All"}">${t}<span class="count">${count(t)}</span></button>`).join("")}</div>
+  <div class="work-tools">
+    <div class="filters" role="group" aria-label="Filter projects">${types.map(t => `<button class="filter" type="button" data-filter="${t}" aria-pressed="${t === "All"}">${t}<span class="count">${count(t)}</span></button>`).join("")}</div>
+    ${viewToggle()}
+  </div>
   <p class="filter-status" data-filter-status aria-live="polite">Showing all ${SITE.projects.length} projects</p>
-  <div class="work-list">${SITE.projects.map(workRow).join("")}</div>
+  <div class="work-list" data-view="${workView()}">${SITE.projects.map(workRow).join("")}</div>
 </section>
 <div class="section"></div>`;
   };
