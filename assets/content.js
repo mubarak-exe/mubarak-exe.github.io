@@ -280,6 +280,7 @@
       tools: ["GPT-4o", "LangGraph", "Python", "DTUMOS"],
       cover: "agent",
       seed: 7,
+      demo: "/demos/text2simulation/",   // the card opens the demo (replays saved runs) instead of a case study
       featured: true,
       hook: "Describe a traffic scenario in plain language. An LLM agent sets it up in the digital twin, after checking it can actually run.",
       thesis: "A natural-language interface for a transportation digital twin, with a verifier that stops requests the simulator can't support.",
