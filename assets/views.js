@@ -777,7 +777,13 @@
   </div>
 </section>
 
-<section class="wrap about-block" id="get-in-touch" aria-labelledby="touch-title">
+${touchSection(P, "about-block")}`;
+  };
+
+  /* "Get in touch" box (text and links left, form right), shared by About (end of page) and Contact.
+     app.js setupContactForm wires up whichever copy is on the page. */
+  function touchSection(P, cls) {
+    return `<section class="wrap ${cls}" id="get-in-touch" aria-labelledby="touch-title">
   <div class="touch">
     <div class="touch-intro">
       <p class="kicker dash">Get in touch</p>
@@ -796,7 +802,7 @@
     </form>
   </div>
 </section>`;
-  };
+  }
 
   V.contact = function () {
     const P = SITE.person;
@@ -812,6 +818,7 @@
   <a class="contact-card rv" href="${esc(P.github)}" target="_blank" rel="noopener"><span class="kicker">GitHub</span><span class="contact-card-title">${P.githubLabel}</span>${EXT}</a>
   <div class="contact-card rv"><span class="kicker">Based in</span><span class="contact-card-title">${P.location}</span><span class="mono-sm">${P.coords}</span></div>
 </section>
+${touchSection(P, "contact-touch")}
 <section class="wrap section reasons" aria-labelledby="reasons-title">
   <div class="section-head"><div><p class="kicker dash">Good reasons to write</p><h2 class="display section-title" id="reasons-title">What I'm open to.</h2></div></div>
   <div class="info-cards">

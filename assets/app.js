@@ -96,7 +96,7 @@
     if (main.querySelector("[data-view-btn]")) safe(setupViewToggle);
     if (r.view === "thinking") safe(setupProcess);
     if (r.view === "about") safe(setupTimeline);
-    if (r.view === "about") safe(setupContactForm);
+    if (r.view === "about" || r.view === "contact") safe(setupContactForm);
   }
 
   /* ---------------- Scroll reveals & counters ---------------- */
@@ -345,7 +345,7 @@
     });
   }
 
-  /* ---------------- About: compact contact form ----------------
+  /* ---------------- About and Contact: compact contact form ----------------
      With a Formspree form ID (SITE.person.formspree) the message is posted there and arrives by email.
      Without one, the visitor's email app opens with the message filled in. */
   function setupContactForm() {

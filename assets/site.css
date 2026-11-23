@@ -997,6 +997,7 @@ a.contact-card:hover { border-color: var(--accent); }
 .contact-card-title { font-family: var(--display); font-weight: 700; font-stretch: 104%; font-size: 1.3rem; overflow-wrap: anywhere; }
 .contact-card .arr { position: absolute; top: 22px; right: 22px; color: var(--accent); }
 a.contact-card:hover .arr { transform: translate(3px, -3px); }
+.contact-touch { padding-top: clamp(40px, 5vw, 64px); }  /* same "Get in touch" box as About, under the contact cards */
 .reasons { padding-bottom: clamp(80px, 10vw, 140px); }
 
 /* ---------- Poems and Photography (calm pages) ---------- */
