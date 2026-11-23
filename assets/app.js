@@ -722,6 +722,7 @@
   });
   dlg.addEventListener("click", e => { if (e.target === dlg) closePalette(); });
   doc.getElementById("open-palette").addEventListener("click", openPalette);
+  doc.getElementById("close-palette").addEventListener("click", () => closePalette());
 
   const isTyping = el => el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
   doc.addEventListener("keydown", e => {
