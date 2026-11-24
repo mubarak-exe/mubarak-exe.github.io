@@ -1365,3 +1365,47 @@ main.fade-in { animation: vt-in 0.5s var(--ease) both; }
   .work-list[data-view="list"] .work-meta { display: grid; gap: 2px; align-self: center; }
   .work-list[data-view="list"] .work-meta span + span::before { content: none; }
 }
+
+/* ---------- Project pictures: demo screenshots and paper tiles in one soft frame (2026-11-23) ---------- */
+:root { --frame-bg: #D3E0EC; --paper-bg: #FBFCFE; --paper-ink: #16222F; --paper-venue: #904308; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --frame-bg: #11253B; --paper-bg: #DCE4EC; } }
+:root[data-theme="dark"] { --frame-bg: #11253B; --paper-bg: #DCE4EC; }
+.cover-frame { display: flex; width: 100%; height: 100%; overflow: hidden; background: var(--frame-bg); }
+/* screenshot: day and night versions, the page's theme shows one */
+.cover-shot { align-items: center; justify-content: center; padding: 6% 7%; }
+.cover-shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 7px;
+  box-shadow: 0 12px 28px -12px rgba(6, 14, 24, .55), 0 0 0 1px rgba(6, 14, 24, .08); transition: transform .6s var(--ease); }
+.cover-shot .shot-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cover-shot .shot-light { display: none; }
+  :root:not([data-theme="light"]) .cover-shot .shot-dark { display: block; }
+}
+:root[data-theme="dark"] .cover-shot .shot-light { display: none; }
+:root[data-theme="dark"] .cover-shot .shot-dark { display: block; }
+/* figures from the project folders (white paper figures, one version): a touch dimmer at night so they don't glare */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cover-figure img { filter: brightness(.9); } }
+:root[data-theme="dark"] .cover-figure img { filter: brightness(.9); }
+/* paper tile: the top of a typeset page, venue and title, a few faint lines of text */
+.cover-paper { justify-content: center; align-items: flex-start; padding-top: 7%; }
+/* every size inside the sheet is a share of the sheet's width (cqw), so the page looks the same in a card or a banner */
+.paper-sheet { container-type: inline-size; width: 58%; min-height: 125%; border-radius: 5px 5px 0 0; background: var(--paper-bg); color: var(--paper-ink);
+  box-shadow: 0 14px 30px -14px rgba(6, 14, 24, .55); transition: transform .6s var(--ease); }
+.paper-inner { display: flex; flex-direction: column; gap: 5cqw; padding: 10cqw 10cqw 0; }
+.paper-venue { font-family: var(--mono); font-size: 4.2cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper-venue); }
+.paper-title { font-family: var(--serif); font-weight: 600; font-size: 8.8cqw; line-height: 1.2; letter-spacing: -0.005em; }
+.paper-lines { display: grid; gap: 3.6cqw; margin-top: 1cqw; }
+.paper-lines i { display: block; height: 2.4cqw; border-radius: 2px; background: color-mix(in srgb, var(--paper-ink) 13%, transparent); }
+.paper-lines i:nth-child(3n) { width: 86%; }
+.paper-lines i:last-child { width: 60%; }
+.cs-cover .paper-sheet { width: 30%; }                    /* the wide banner on a case study page */
+/* licence credit for an openly licensed photo: a small chip on the picture, the full linked credit under a case study banner */
+.cover-figure { position: relative; }
+.cover-credit { position: absolute; right: 9%; bottom: 9%; padding: 2px 7px; border-radius: 6px; background: rgba(255, 255, 255, .85);
+  color: #3D4A57; font-family: var(--sans); font-size: 10px; line-height: 1.5; pointer-events: none; }
+.cs-cover-credit { margin: 8px 2px 0; font-size: 0.78rem; color: var(--muted); }
+.cs-cover .cover-credit { display: none; }                 /* the full credit sits under the banner */
+.cs-cover-credit a { color: inherit; }
+.cs-cover .cover-shot { padding: 4% 6%; }
+.cs-cover .cover-shot img { object-fit: contain; box-shadow: none; }   /* show the whole figure, centred in the banner */
+.work-row:hover .cover-shot img, .mini-card:hover .cover-shot img, .from-project a:hover .cover-shot img,
+.work-row:hover .paper-sheet, .mini-card:hover .paper-sheet, .from-project a:hover .paper-sheet { transform: translateY(-4px); }

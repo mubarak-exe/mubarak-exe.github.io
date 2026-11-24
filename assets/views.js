@@ -369,11 +369,23 @@
   // A project with a demo opens the demo (a separate page on mubarak.sh/demos/) instead of a case study.
   const projHref = p => esc(p.demo || "#" + p.id);
   SITE.projHref = projHref;
+  // A project's picture, in a soft frame: a screenshot of its live demo (day and night versions, the page's theme picks
+  // one), a figure or screenshot from the project's own folder (one version), or a typeset "paper" tile. Older drawn
+  // covers are the fallback.
+  function projectCover(p, extra = 0) {
+    if (p.shot) return `<span class="cover-frame cover-shot">${["light", "dark"].map(t =>
+      `<img class="shot-${t}" src="assets/covers/${esc(p.shot)}-${t}.webp" alt="" width="1200" height="750" loading="lazy" decoding="async">`).join("")}</span>`;
+    if (p.figure) return `<span class="cover-frame cover-shot cover-figure"><img src="assets/covers/${esc(p.figure)}.webp" alt="" width="1200" height="750" loading="lazy" decoding="async">${p.figureCredit ? `<span class="cover-credit">${esc(p.figureCredit.short)}</span>` : ""}</span>`;
+    if (p.paper) return `<span class="cover-frame cover-paper"><span class="paper-sheet"><span class="paper-inner">
+      <span class="paper-venue">${esc(p.paper.venue)}</span><span class="paper-title">${esc(p.paper.title)}</span>
+      <span class="paper-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span></span></span></span>`;
+    return cover(p.cover, p.seed + extra);
+  }
   function workRow(p) {
     const i = SITE.projects.indexOf(p);
     return `<a class="work-row rv" href="${projHref(p)}" data-type="${p.type}" data-id="${p.id}">
       <span class="work-idx">${pad2(i + 1)}</span>
-      <span class="work-cover">${cover(p.cover, p.seed)}</span>
+      <span class="work-cover">${projectCover(p)}</span>
       <span class="work-body">
         <span class="work-top"><span class="work-meta"><span>${p.type}</span><span>${p.tagline}</span><span>${p.years}</span></span>${p.demo
           ? `<span class="demo-btn">Try the demo ${ARR}</span>` : ""}</span>
@@ -396,7 +408,7 @@
     </div>`;
   }
   function miniCard(p) {
-    return `<a class="mini-card rv" href="${projHref(p)}"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="work-meta"><span>${p.type}</span><span>${p.years}</span></span><span class="mini-card-title">${p.title}</span>${p.demo ? `<span class="mini-demo">Try the demo ${ARR}</span>` : ""}</a>`;
+    return `<a class="mini-card rv" href="${projHref(p)}"><span class="work-cover">${projectCover(p)}</span><span class="work-meta"><span>${p.type}</span><span>${p.years}</span></span><span class="mini-card-title">${p.title}</span>${p.demo ? `<span class="mini-demo">Try the demo ${ARR}</span>` : ""}</a>`;
   }
   function noteCard(n) {
     const i = SITE.notes.indexOf(n);
@@ -415,7 +427,6 @@
   V.home = function () {
     const P = SITE.person;
     const featured = SITE.projects.filter(p => p.featured);
-    const toolkit = SITE.toolkit.map(t => `<span>${t}</span>`).join("");
     return `
 <div class="hero-shell" data-learn-hero><canvas class="learn-field" aria-hidden="true"></canvas>
 <section class="wrap hero" aria-labelledby="hero-title">
@@ -447,8 +458,6 @@
 <section class="band stats-band" aria-label="Highlights">
   <div class="wrap stats-grid">${SITE.stats.map(s => `<a class="stat rv" href="#${s.view}"><span class="stat-value" data-count>${s.value}</span><span class="stat-label">${s.label}</span></a>`).join("")}</div>
 </section>
-
-<div class="marquee" aria-hidden="true"><div class="marquee-track">${toolkit}${toolkit}</div></div>
 
 <section class="wrap section" aria-labelledby="sel-title">
   <div class="section-head">
@@ -511,7 +520,7 @@
       <div><dt>Methods and tools</dt><dd>${p.tools.join(", ")}</dd></div>
     </dl>
   </header>
-  <div class="wrap"><div class="cs-cover">${cover(p.cover, p.seed + 101)}</div></div>
+  <div class="wrap"><div class="cs-cover">${projectCover(p, 101)}</div>${p.figureCredit ? `<p class="cs-cover-credit">Photo: “<a href="${esc(p.figureCredit.href)}" target="_blank" rel="noopener">${esc(p.figureCredit.title)}</a>” by ${esc(p.figureCredit.author)}, <a href="${esc(p.figureCredit.licenseHref)}" target="_blank" rel="noopener">${esc(p.figureCredit.license)}</a>, via Wikimedia Commons (cropped).</p>` : ""}</div>
   <section class="band cs-outcomes" aria-label="Outcomes">
     <div class="wrap"><p class="kicker dash">Outcomes</p><div class="stats-grid">${p.outcomes.map(o => `<div class="stat rv"><span class="stat-value" data-count>${o.value}</span><span class="stat-label">${o.label}</span></div>`).join("")}</div></div>
   </section>
@@ -703,7 +712,7 @@
     ${sectionIndex(n.sections, "In this note")}
     <div class="prose">${sectionsHTML(n.sections)}</div>
   </div>
-  ${p ? `<div class="wrap from-project"><a href="${projHref(p)}" class="rv"><span class="work-cover">${cover(p.cover, p.seed)}</span><span class="from-project-body"><span class="kicker">From the project</span><span class="mini-card-title">${p.title}</span><span class="work-hook">${p.hook}</span><span class="work-cta">Read the case study ${ARR}</span></span></a></div>` : ""}
+  ${p ? `<div class="wrap from-project"><a href="${projHref(p)}" class="rv"><span class="work-cover">${projectCover(p)}</span><span class="from-project-body"><span class="kicker">From the project</span><span class="mini-card-title">${p.title}</span><span class="work-hook">${p.hook}</span><span class="work-cta">Read the case study ${ARR}</span></span></a></div>` : ""}
   <nav class="wrap pager" aria-label="More notes">
     <a href="#${prev.id}"><span class="pager-dir">← Previous note</span><span class="pager-name">${prev.title}</span></a>
     <a class="next" href="#${next.id}"><span class="pager-dir">Next note →</span><span class="pager-name">${next.title}</span></a>

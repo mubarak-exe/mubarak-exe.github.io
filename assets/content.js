@@ -49,6 +49,7 @@
       org: "SPIN Lab, Wilfrid Laurier University",
       tools: ["Python", "Graph Transformers", "Map matching", "OpenStreetMap", "MAML", "Reptile"],
       cover: "network",
+      shot: "linketa",   // card picture: screenshot of the live demo (assets/covers/linketa-light|dark.webp)
       seed: 41,
       featured: true,
       demo: "/demos/linketa/",   // the card opens the demo (separate page) instead of a case study
@@ -153,6 +154,7 @@
       org: "SPIN Lab, Wilfrid Laurier University",
       tools: ["Python", "PyTorch", "Graph Attention Networks", "Meta-learning", "OpenStreetMap"],
       cover: "fewshot",
+      shot: "metaeta",   // card picture: original illustration (no paper content: the paper is under review); streets from the site's public OSM files
       seed: 19,
       featured: false,
       hook: "A graph model that learns from two cities, then estimates travel times on every road of a new city from 25 recorded trips, with no retraining.",
@@ -217,6 +219,7 @@
       org: "SPIN Lab, Wilfrid Laurier University",
       tools: ["Python", "PyTorch", "LinkETA", "Bidirectional GRU", "OpenTripPlanner"],
       cover: "transit",
+      figure: "multimodal-eta",
       seed: 23,
       featured: false,
       hook: "LinkETA extended to buses and built into OpenTripPlanner, to estimate commutes that mix bus and taxi.",
@@ -279,6 +282,7 @@
       org: "SPIN Lab, Wilfrid Laurier University",
       tools: ["GPT-4o", "LangGraph", "Python", "DTUMOS"],
       cover: "agent",
+      shot: "text2simulation",
       seed: 7,
       demo: "/demos/text2simulation/",   // the card opens the demo (replays saved runs) instead of a case study
       featured: true,
@@ -362,6 +366,7 @@
       org: "Glazingshopee, Mumbai",
       tools: ["Agile sprint planning", "SRS and FRS", "Use case diagrams", "Test cases"],
       cover: "facade",
+      shot: "glazingshopee",
       seed: 3,
       featured: true,
       demo: "/demos/igu-quote/",   // the card opens the demo (separate page) instead of a case study
@@ -434,6 +439,8 @@
       org: "SQUAD Lab, Wilfrid Laurier University",
       tools: ["Systematic review", "Multimodal affect recognition", "Socially Assistive Robots"],
       cover: "signals",
+      figure: "dementia-review",   // card picture: an openly licensed photo (no paper content: the review is under review)
+      figureCredit: { short: "Photo: SoftBank Robotics Europe · CC BY-SA 4.0", title: "Pepper the Robot", author: "SoftBank Robotics Europe", license: "CC BY-SA 4.0", href: "https://commons.wikimedia.org/wiki/File:Pepper_the_Robot.jpg", licenseHref: "https://creativecommons.org/licenses/by-sa/4.0/" },
       seed: 29,
       featured: false,
       hook: "A systematic review of how Socially Assistive Robots recognize emotion in people living with dementia, and why lab results don't transfer.",
@@ -502,6 +509,7 @@
       org: "Sanjay Ghodawat University, Kolhapur",
       tools: ["Deep learning", "BiLSTM", "TCN", "Attention mechanism"],
       cover: "attention",
+      figure: "fake-news",
       seed: 17,
       featured: false,
       hook: "My undergraduate project: a hybrid BiLSTM-TCN model with attention, recognised with the SGU Best Project Award.",
