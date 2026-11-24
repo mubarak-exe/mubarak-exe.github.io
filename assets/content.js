@@ -428,8 +428,8 @@
 
     {
       id: "dementia-review",
-      title: "Affect recognition for dementia care",
-      titleLines: ["Affect recognition", "for dementia care"],
+      title: "Affect recognition by Socially Assistive Robots",
+      titleLines: ["Affect recognition by", "Socially Assistive Robots"],
       type: "Research",
       tagline: "Systematic review",
       tags: ["review", "affective computing", "robots", "dementia", "emotion", "datasets"],
